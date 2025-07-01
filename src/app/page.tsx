@@ -190,7 +190,7 @@ export default function Home() {
 <script>fetch("https://assets.mailerlite.com/jsonp/1627697/forms/158745988459136353/takel")</script>
 ` }}
           />
-        </div>
+    </div>
       </section>
     </main>
   );
