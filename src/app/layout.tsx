@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from 'next/link';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,14 +33,14 @@ export default function RootLayout({
       >
         <header className="w-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-400 shadow-md">
           <nav className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
-            <a href="/" className="text-2xl font-bold text-white tracking-tight">Wander Studios</a>
+            <Link href="/" className="text-2xl font-bold text-white tracking-tight">Wander Studios</Link>
             <ul className="flex gap-4 text-white font-semibold text-lg">
-              <li><a href="/" className="hover:underline">Home</a></li>
-              <li><a href="/book" className="hover:underline">Book</a></li>
-              <li><a href="/waiver" className="hover:underline">Waiver</a></li>
-              <li><a href="/about" className="hover:underline">About</a></li>
-              <li><a href="/contact" className="hover:underline">Contact</a></li>
-              {/* <li><a href="/thank-you" className="hover:underline">Thank You</a></li> */}
+              <li><Link href="/" className="hover:underline">Home</Link></li>
+              <li><Link href="/book" className="hover:underline">Book</Link></li>
+              <li><Link href="/waiver" className="hover:underline">Waiver</Link></li>
+              <li><Link href="/about" className="hover:underline">About</Link></li>
+              <li><Link href="/contact" className="hover:underline">Contact</Link></li>
+              {/* <li><Link href="/thank-you" className="hover:underline">Thank You</Link></li> */}
             </ul>
           </nav>
         </header>

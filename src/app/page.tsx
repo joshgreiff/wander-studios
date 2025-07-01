@@ -45,11 +45,11 @@ export default function Home() {
         <h2 className="text-xl font-bold mb-4 text-orange-900">What Our Students Say</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="bg-orange-100 border-l-4 border-orange-400 rounded p-4 shadow">
-            <p className="italic text-orange-800 mb-2">"Wander Studios classes are the highlight of my week. I feel stronger and more connected to my body!"</p>
+            <p className="italic text-orange-800 mb-2">&quot;Wander Studios classes are the highlight of my week. I feel stronger and more connected to my body!&quot;</p>
             <p className="text-orange-700 font-semibold">– Jamie</p>
           </div>
           <div className="bg-orange-100 border-l-4 border-orange-400 rounded p-4 shadow">
-            <p className="italic text-orange-800 mb-2">"Leah's approach is so welcoming and inclusive. I never feel out of place, no matter my experience level."</p>
+            <p className="italic text-orange-800 mb-2">&quot;Leah&apos;s approach is so welcoming and inclusive. I never feel out of place, no matter my experience level.&quot;</p>
             <p className="text-orange-700 font-semibold">– Taylor</p>
           </div>
         </div>
