@@ -1,24 +1,80 @@
-export default function Book() {
+"use client";
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+
+export default function BookPage() {
+  const [classes, setClasses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bookingClassId, setBookingClassId] = useState<number | null>(null);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', waiver: false, signature: '' });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/classes')
+      .then(res => res.json())
+      .then(data => {
+        setClasses(data);
+        setLoading(false);
+      });
+  }, []);
+
+  function handleBookClick(classId: number) {
+    setBookingClassId(classId);
+    setForm({ name: '', email: '', phone: '', waiver: false, signature: '' });
+    setSubmitted(false);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value, type, checked } = e.target;
+    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // TODO: Integrate booking API and Stripe
+    setSubmitted(true);
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-      <section className="max-w-2xl w-full bg-white/80 rounded-xl shadow-lg p-8 mt-8">
-        <h2 className="text-3xl font-bold mb-4 text-orange-900">Book a Class</h2>
-        <p className="mb-4 text-orange-800">Reserve your spot for an upcoming Pilates or yoga class. Payment is handled securely through our booking partner below.</p>
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold text-orange-900 mb-2">Class Descriptions</h3>
-          <ul className="list-disc list-inside text-orange-800">
-            <li><strong>Pilates Flow:</strong> All levels, focused on strength and mobility.</li>
-            <li><strong>Yoga for Resilience:</strong> Gentle, grounding, and restorative.</li>
-            <li><strong>Community Movement:</strong> A blend of Pilates, yoga, and mindful movement for everyone.</li>
+      <section className="max-w-2xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
+        <h1 className="text-3xl font-bold mb-6 text-orange-900 text-center">Book a Class</h1>
+        {loading ? (
+          <div className="text-orange-700">Loading...</div>
+        ) : classes.length === 0 ? (
+          <div className="text-orange-700">No classes scheduled yet.</div>
+        ) : (
+          <ul className="w-full flex flex-col gap-4">
+            {classes.map(c => {
+              // Format time to 12-hour format with EST
+              let formattedTime = c.time;
+              if (c.time) {
+                const dateObj = new Date(`1970-01-01T${c.time}`);
+                formattedTime = dateObj.toLocaleTimeString([], {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  timeZone: 'America/New_York',
+                  timeZoneName: 'short'
+                });
+              }
+              return (
+                <li key={c.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 shadow">
+                  <div>
+                    <div className="font-semibold text-orange-900 text-lg">{c.date?.slice(0, 10)} {formattedTime}</div>
+                    <div className="text-orange-800">{c.description}</div>
+                    <div className="text-orange-700 text-sm">Capacity: {c.capacity}</div>
+                  </div>
+                  <Link
+                    href={`/book/${c.id}`}
+                    className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition text-center"
+                  >
+                    Book
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
-        </div>
-        <div className="mb-8">
-          {/* TODO: Embed Square/Calendly/Jotform scheduler here */}
-          <div className="bg-orange-100 border border-orange-300 rounded p-4 text-center text-orange-700">
-            [Booking scheduler will appear here]
-          </div>
-        </div>
-        <p className="text-orange-700 text-sm">Payment is required at the time of booking.</p>
+        )}
       </section>
     </main>
   );

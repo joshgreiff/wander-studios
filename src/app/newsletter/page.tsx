@@ -12,6 +12,11 @@ export default function Newsletter() {
 <style type="text/css">@import url('https://assets.mlcdn.com/fonts.css?version=1750852');</style>
 <style>
 #mlb2-27886150 .ml-form-embedContent { display: none !important; }
+#mlb2-27886150 .ml-form-successContent h4,
+#mlb2-27886150 .ml-form-successContent p {
+  color: #b45309 !important;
+  font-weight: 600;
+}
 #mlb2-27886150 .ml-form-embedBody .ml-block-form {
   display: flex;
   flex-direction: row;
