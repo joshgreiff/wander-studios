@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -9,7 +10,7 @@ export default function Home() {
         <div className="flex justify-center mb-6">
           <Image src="/images/IMG_8658.JPG" alt="Wander Studios instructor" width={400} height={400} className="rounded-lg shadow-md object-cover" />
         </div>
-        <a href="/book" className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-8 rounded-full transition mb-6">Book a Class</a>
+        <Link href="/book" className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-8 rounded-full transition mb-6">Book a Class</Link>
         <p className="text-orange-900 font-semibold mb-2">All levels, all budgets, all locations, all sizes. <span className="italic">Come as you are.</span></p>
       </section>
       <section className="max-w-3xl w-full bg-white/90 rounded-xl shadow p-6 mb-8 flex flex-col items-center">

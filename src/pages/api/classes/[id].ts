@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const classItem = await prisma.class.findUnique({ where: { id: Number(id) } });
       if (!classItem) return res.status(404).json({ error: 'Class not found' });
       return res.status(200).json(classItem);
-    } catch (error) {
+    } catch {
       return res.status(500).json({ error: 'Failed to fetch class' });
     }
   }
@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       await prisma.class.delete({ where: { id: Number(id) } });
       return res.status(204).end();
-    } catch (error) {
+    } catch {
       return res.status(404).json({ error: 'Class not found' });
     }
   }

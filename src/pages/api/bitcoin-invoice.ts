@@ -32,7 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await response.json();
     if (!data || !data.invoice_url) throw new Error('No invoice URL returned');
     return res.status(200).json({ url: data.invoice_url });
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message || 'Failed to create Speed invoice' });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message || 'Failed to create Speed invoice' });
+    }
+    return res.status(500).json({ error: 'Failed to create Speed invoice' });
   }
 } 

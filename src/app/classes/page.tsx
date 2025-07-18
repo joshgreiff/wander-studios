@@ -1,8 +1,16 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 
+type Class = {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  capacity: number;
+};
+
 export default function ClassesPage() {
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
