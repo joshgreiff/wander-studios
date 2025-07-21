@@ -17,7 +17,6 @@ export default function BookClassPage() {
   const [classData, setClassData] = useState<Class | null>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: '', email: '', phone: '', waiver: false, signature: '' });
-  const [submitted, setSubmitted] = useState(false);
   const [paying, setPaying] = useState<'square' | 'bitcoin' | null>(null);
 
   useEffect(() => {
@@ -90,9 +89,6 @@ export default function BookClassPage() {
               <div>Capacity: {classData.capacity}</div>
             </div>
             <form onSubmit={e => e.preventDefault()} className="w-full max-w-md flex flex-col gap-4 bg-white/90 rounded p-6 border shadow">
-              {submitted ? (
-                <div className="text-green-700 font-semibold">Booking submitted! (Payment coming soon)</div>
-              ) : (
                 <>
                   <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
                     <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
@@ -121,7 +117,6 @@ export default function BookClassPage() {
                     {paying === 'bitcoin' ? 'Processing...' : 'Pay with Bitcoin (Speed) $9.50'}
                   </button>
                 </>
-              )}
             </form>
           </>
         )}
