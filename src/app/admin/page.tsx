@@ -138,7 +138,7 @@ export default function AdminPage() {
           {classes.map(c => (
             <li key={c.id} className="flex items-center justify-between border-b py-2">
               <div>
-                <span className="font-semibold text-orange-900">{c.date?.slice(0, 10)} {c.time}</span> — {c.description} (Capacity: {c.capacity})
+                <span className="font-semibold text-orange-900">{c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})</span>
               </div>
               <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:underline ml-4">Delete</button>
             </li>
