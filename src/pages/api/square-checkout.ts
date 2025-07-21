@@ -9,6 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { email, classId } = req.body;
   const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
   const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
+  const SQUARE_ENV = process.env.SQUARE_ENV || 'production';
 
   if (!SQUARE_ACCESS_TOKEN || !SQUARE_LOCATION_ID) {
     return res.status(500).json({ error: 'Missing Square credentials' });
@@ -16,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const client = new SquareClient({
-      environment: SquareEnvironment.Sandbox, // or SquareEnvironment.Production for live
+      environment: SQUARE_ENV === 'sandbox' ? SquareEnvironment.Sandbox : SquareEnvironment.Production,
       token: SQUARE_ACCESS_TOKEN,
     });
 
