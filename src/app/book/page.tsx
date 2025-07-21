@@ -2,12 +2,17 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+type Class = {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  capacity: number;
+};
+
 export default function BookPage() {
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookingClassId, setBookingClassId] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', waiver: false, signature: '' });
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     fetch('/api/classes')
@@ -17,23 +22,6 @@ export default function BookPage() {
         setLoading(false);
       });
   }, []);
-
-  function handleBookClick(classId: number) {
-    setBookingClassId(classId);
-    setForm({ name: '', email: '', phone: '', waiver: false, signature: '' });
-    setSubmitted(false);
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value, type, checked } = e.target;
-    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: Integrate booking API and Stripe
-    setSubmitted(true);
-  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">

@@ -3,10 +3,18 @@ import React, { useState, useEffect } from 'react';
 
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '';
 
+type Class = {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  capacity: number;
+};
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [form, setForm] = useState({ date: '', time: '', description: '', capacity: 10 });
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +27,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (authenticated) fetchClasses();
-    // eslint-disable-next-line
   }, [authenticated]);
 
   async function fetchClasses() {

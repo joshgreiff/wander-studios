@@ -2,11 +2,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+type Class = {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  capacity: number;
+};
+
 export default function BookClassPage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const router = useRouter();
-  const [classData, setClassData] = useState<any>(null);
+  const [classData, setClassData] = useState<Class | null>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: '', email: '', phone: '', waiver: false, signature: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -24,12 +32,6 @@ export default function BookClassPage() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = e.target;
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: Integrate booking API and Stripe
-    setSubmitted(true);
   }
 
   async function handlePayment(method: 'square' | 'bitcoin') {
@@ -52,7 +54,7 @@ export default function BookClassPage() {
       } else {
         alert(data.error || 'Payment error');
       }
-    } catch (err) {
+    } catch {
       alert('Payment error');
     } finally {
       setPaying(null);
