@@ -35,9 +35,16 @@ export default function BookClassPage() {
 
   // Function to format date and time
   function formatDateTime(dateString: string, timeString: string) {
-    // Ensure the date is interpreted as local date (not UTC)
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month is 0-indexed
+    // Handle both ISO date strings and simple date strings
+    let date: Date;
+    if (dateString.includes('T')) {
+      // ISO date string from database (e.g., "2025-08-09T00:00:00.000Z")
+      date = new Date(dateString);
+    } else {
+      // Simple date string (e.g., "2025-08-09")
+      const [year, month, day] = dateString.split('-').map(Number);
+      date = new Date(year, month - 1, day); // month is 0-indexed
+    }
     
     // Format date like "Saturday, August 9th"
     const dateOptions: Intl.DateTimeFormatOptions = {
@@ -87,19 +94,34 @@ export default function BookClassPage() {
       classId: classData?.id,
     };
     try {
+      console.log(`Making ${method} payment request:`, body);
+      
       const res = await fetch(api, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
+      
+      console.log(`${method} payment response status:`, res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`${method} payment error response:`, errorText);
+        alert(`Payment error: ${res.status} - ${errorText}`);
+        return;
+      }
+      
       const data = await res.json();
+      console.log(`${method} payment success:`, data);
+      
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Payment error');
+        alert(data.error || 'Payment error - no URL returned');
       }
-    } catch {
-      alert('Payment error');
+    } catch (error) {
+      console.error(`${method} payment fetch error:`, error);
+      alert(`Payment error: ${error instanceof Error ? error.message : 'Network error'}`);
     } finally {
       setPaying(null);
     }
