@@ -39,19 +39,21 @@ export default function BookClassPage() {
     let date: Date;
     if (dateString.includes('T')) {
       // ISO date string from database (e.g., "2025-08-09T00:00:00.000Z")
-      date = new Date(dateString);
+      // Extract just the date part to avoid timezone issues
+      const dateOnly = dateString.split('T')[0];
+      const [year, month, day] = dateOnly.split('-').map(Number);
+      date = new Date(year, month - 1, day); // month is 0-indexed
     } else {
       // Simple date string (e.g., "2025-08-09")
       const [year, month, day] = dateString.split('-').map(Number);
       date = new Date(year, month - 1, day); // month is 0-indexed
     }
     
-    // Format date like "Saturday, August 9th"
+    // Format date like "Saturday, August 9th" - use local timezone
     const dateOptions: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       month: 'long',
-      day: 'numeric',
-      timeZone: 'America/New_York'
+      day: 'numeric'
     };
     
     // Add ordinal suffix to day
