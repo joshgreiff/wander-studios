@@ -34,4 +34,43 @@ model Booking {
   waiverAgreed Boolean
   paid         Boolean  @default(false)
   createdAt    DateTime @default(now())
+  
+  // Optional link to full waiver record
+  waiver       Waiver?  @relation(fields: [waiverId], references: [id])
+  waiverId     Int?
+}
+
+model Waiver {
+  id                Int      @id @default(autoincrement())
+  
+  // Personal Information
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  dateOfBirth       DateTime?
+  
+  // Emergency Contact
+  emergencyContact  String
+  emergencyPhone    String
+  relationship      String?
+  
+  // Health Information
+  healthConditions  String?  // Text field for health conditions
+  injuries          String?  // Text field for recent injuries/surgeries
+  medications       String?  // Text field for current medications
+  isPregnant        Boolean  @default(false)
+  pregnancyWeeks    Int?     // Only if isPregnant is true
+  
+  // Legal Agreement
+  digitalSignature  String   // Full name as digital signature
+  waiverAgreed      Boolean  @default(false)
+  healthInfoAgreed  Boolean  @default(false)
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Optional: Link to bookings (if you want to track which bookings used this waiver)
+  bookings          Booking[]
 }

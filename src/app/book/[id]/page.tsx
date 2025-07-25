@@ -33,6 +33,48 @@ export default function BookClassPage() {
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   }
 
+  // Function to format date and time
+  function formatDateTime(dateString: string, timeString: string) {
+    const date = new Date(dateString);
+    const time = new Date(`1970-01-01T${timeString}`);
+    
+    // Format date like "Saturday, August 9th"
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    // Add ordinal suffix to day
+    const day = date.getDate();
+    const suffix = getOrdinalSuffix(day);
+    
+    const formattedDate = date.toLocaleDateString('en-US', dateOptions).replace(/\d+$/, day + suffix);
+    
+    // Format time like "10:00am EST"
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'America/New_York',
+      timeZoneName: 'short'
+    };
+    
+    const formattedTime = time.toLocaleTimeString('en-US', timeOptions);
+    
+    return `${formattedDate} at ${formattedTime}`;
+  }
+
+  // Function to get ordinal suffix (1st, 2nd, 3rd, etc.)
+  function getOrdinalSuffix(day: number) {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
+
   async function handlePayment(method: 'square' | 'bitcoin') {
     setPaying(method);
     const api = method === 'square' ? '/api/square-checkout' : '/api/bitcoin-invoice';
@@ -60,18 +102,6 @@ export default function BookClassPage() {
     }
   }
 
-  // Format time to 12-hour format with EST
-  let formattedTime = classData?.time;
-  if (classData?.time) {
-    const dateObj = new Date(`1970-01-01T${classData.time}`);
-    formattedTime = dateObj.toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZone: 'America/New_York',
-      timeZoneName: 'short'
-    });
-  }
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
       <section className="max-w-xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
@@ -84,8 +114,7 @@ export default function BookClassPage() {
           <>
             <h1 className="text-2xl font-bold mb-2 text-orange-900 text-center">Book: {classData.description}</h1>
             <div className="mb-4 text-orange-800 text-center">
-              <div>Date: {classData.date?.slice(0, 10)}</div>
-              <div>Time: {formattedTime}</div>
+              <div className="font-semibold text-lg">{formatDateTime(classData.date, classData.time)}</div>
               <div>Capacity: {classData.capacity}</div>
             </div>
             <form onSubmit={e => e.preventDefault()} className="w-full max-w-md flex flex-col gap-4 bg-white/90 rounded p-6 border shadow">
@@ -95,10 +124,37 @@ export default function BookClassPage() {
                     <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
                     <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <input type="checkbox" name="waiver" checked={form.waiver} onChange={handleChange} required />
-                    <span className="text-orange-800 text-sm">I agree to the liability waiver</span>
+                  
+                  {/* Waiver Section */}
+                  <div className="bg-orange-50 rounded-lg p-4 mt-2">
+                    <h4 className="font-semibold text-orange-900 mb-2">Liability Waiver & Health Information</h4>
+                    <p className="text-sm text-orange-700 mb-3">
+                      <strong>First-time students:</strong> Please complete our full liability waiver and health form before your first class for your safety and our records.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                      <a 
+                        href="/waiver" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded text-center text-sm transition"
+                      >
+                        Complete Full Waiver
+                      </a>
+                      <span className="text-xs text-orange-600 text-center sm:self-center">
+                        (Opens in new tab)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" name="waiver" checked={form.waiver} onChange={handleChange} required />
+                      <span className="text-orange-800 text-sm">
+                        I agree to the{' '}
+                        <a href="/waiver" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 underline">
+                          liability waiver terms
+                        </a>
+                      </span>
+                    </div>
                   </div>
+                  
                   <input name="signature" value={form.signature} onChange={handleChange} placeholder="Type your name as signature" required className="border rounded px-3 py-2 mt-2 bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
                   <button
                     type="button"

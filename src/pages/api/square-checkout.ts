@@ -36,6 +36,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
           },
         ],
+        taxes: [
+          {
+            name: 'Sales Tax',
+            percentage: '7.00',
+            scope: 'ORDER',
+          },
+        ],
       },
       checkoutOptions: {
         redirectUrl: `${req.headers.origin}/thank-you`,

@@ -23,6 +23,48 @@ export default function BookPage() {
       });
   }, []);
 
+  // Function to format date and time
+  function formatDateTime(dateString: string, timeString: string) {
+    const date = new Date(dateString);
+    const time = new Date(`1970-01-01T${timeString}`);
+    
+    // Format date like "Saturday, August 9th"
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    // Add ordinal suffix to day
+    const day = date.getDate();
+    const suffix = getOrdinalSuffix(day);
+    
+    const formattedDate = date.toLocaleDateString('en-US', dateOptions).replace(/\d+$/, day + suffix);
+    
+    // Format time like "10:00am EST"
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'America/New_York',
+      timeZoneName: 'short'
+    };
+    
+    const formattedTime = time.toLocaleTimeString('en-US', timeOptions);
+    
+    return `${formattedDate} at ${formattedTime}`;
+  }
+
+  // Function to get ordinal suffix (1st, 2nd, 3rd, etc.)
+  function getOrdinalSuffix(day: number) {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
       <section className="max-w-2xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
@@ -34,21 +76,10 @@ export default function BookPage() {
         ) : (
           <ul className="w-full flex flex-col gap-4">
             {classes.map(c => {
-              // Format time to 12-hour format with EST
-              let formattedTime = c.time;
-              if (c.time) {
-                const dateObj = new Date(`1970-01-01T${c.time}`);
-                formattedTime = dateObj.toLocaleTimeString([], {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  timeZone: 'America/New_York',
-                  timeZoneName: 'short'
-                });
-              }
               return (
                 <li key={c.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 shadow">
                   <div>
-                    <div className="font-semibold text-orange-900 text-lg">{c.date?.slice(0, 10)} {formattedTime}</div>
+                    <div className="font-semibold text-orange-900 text-lg">{formatDateTime(c.date, c.time)}</div>
                     <div className="text-orange-800">{c.description}</div>
                     <div className="text-orange-700 text-sm">Capacity: {c.capacity}</div>
                   </div>
