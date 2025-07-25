@@ -25,21 +25,30 @@ export default function BookPage() {
 
   // Function to format date and time
   function formatDateTime(dateString: string, timeString: string) {
-    const date = new Date(dateString);
-    const time = new Date(`1970-01-01T${timeString}`);
+    // Handle both ISO date strings and simple date strings
+    let date: Date;
+    if (dateString.includes('T')) {
+      // ISO date string from database (e.g., "2025-08-09T00:00:00.000Z")
+      date = new Date(dateString);
+    } else {
+      // Simple date string (e.g., "2025-08-09")
+      const [year, month, day] = dateString.split('-').map(Number);
+      date = new Date(year, month - 1, day); // month is 0-indexed
+    }
     
     // Format date like "Saturday, August 9th"
     const dateOptions: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'America/New_York'
     };
     
     // Add ordinal suffix to day
-    const day = date.getDate();
-    const suffix = getOrdinalSuffix(day);
+    const displayDay = date.getDate();
+    const suffix = getOrdinalSuffix(displayDay);
     
-    const formattedDate = date.toLocaleDateString('en-US', dateOptions).replace(/\d+$/, day + suffix);
+    const formattedDate = date.toLocaleDateString('en-US', dateOptions).replace(/\d+$/, displayDay + suffix);
     
     // Format time like "10:00am EST"
     const timeOptions: Intl.DateTimeFormatOptions = {
@@ -49,6 +58,7 @@ export default function BookPage() {
       timeZoneName: 'short'
     };
     
+    const time = new Date(`1970-01-01T${timeString}`);
     const formattedTime = time.toLocaleTimeString('en-US', timeOptions);
     
     return `${formattedDate} at ${formattedTime}`;
