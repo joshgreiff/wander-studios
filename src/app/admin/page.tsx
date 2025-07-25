@@ -94,7 +94,7 @@ export default function AdminPage() {
       } else {
         setLoginError(data.error || 'Login failed');
       }
-    } catch (error) {
+    } catch {
       setLoginError('Login failed. Please try again.');
     } finally {
       setLoading(false);

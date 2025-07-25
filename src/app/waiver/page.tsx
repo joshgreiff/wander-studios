@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function Waiver() {
   const [form, setForm] = useState({
@@ -49,7 +50,7 @@ export default function Waiver() {
         const error = await res.json();
         alert(error.error || 'Failed to submit waiver');
       }
-    } catch (error) {
+    } catch {
       alert('Failed to submit waiver. Please try again.');
     } finally {
       setLoading(false);
@@ -62,11 +63,11 @@ export default function Waiver() {
         <section className="max-w-2xl w-full bg-white/80 rounded-xl shadow-lg p-8 mt-8 text-center">
           <h2 className="text-3xl font-bold mb-4 text-orange-900">Thank You!</h2>
           <p className="mb-4 text-orange-800">Your liability waiver and health information have been submitted successfully.</p>
-          <p className="text-orange-700 text-sm">You only need to complete this waiver once. We'll keep your information on file for future classes.</p>
+          <p className="text-orange-700 text-sm">You only need to complete this waiver once. We&apos;ll keep your information on file for future classes.</p>
           <div className="mt-6">
-            <a href="/book" className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-8 rounded-full transition">
+            <Link href="/book" className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-8 rounded-full transition">
               Book a Class
-            </a>
+            </Link>
           </div>
         </section>
       </main>
