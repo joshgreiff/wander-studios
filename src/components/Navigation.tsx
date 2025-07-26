@@ -1,6 +1,8 @@
 "use client";
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 export default function Navigation() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -62,12 +64,13 @@ export default function Navigation() {
         {/* Mobile Hamburger Button */}
         <button
           onClick={toggleMobileMenu}
-          className="md:hidden flex flex-col justify-center items-center w-8 h-8 text-white"
+          className="md:hidden flex justify-center items-center w-8 h-8 text-white text-xl"
           aria-label="Toggle mobile menu"
         >
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : '-translate-y-1'}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : 'translate-y-1'}`}></span>
+          <FontAwesomeIcon 
+            icon={isMobileMenuOpen ? faTimes : faBars} 
+            className="transition-all duration-300"
+          />
         </button>
       </nav>
 
