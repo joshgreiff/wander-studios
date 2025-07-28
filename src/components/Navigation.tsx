@@ -35,11 +35,11 @@ export default function Navigation() {
   };
 
   return (
-    <header className="w-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-400 shadow-md">
+    <header className="w-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-400 shadow-md relative">
       <nav className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
         <Link href="/" className="text-2xl font-bold text-white tracking-tight">Wander Movement</Link>
         
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Show on medium screens and larger */}
         <ul className="hidden md:flex gap-4 text-white font-semibold text-lg">
           <li><Link href="/" className="hover:underline">Home</Link></li>
           <li><Link href="/book" className="hover:underline">Book</Link></li>
@@ -59,10 +59,10 @@ export default function Navigation() {
           )}
         </ul>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile Hamburger Button - Only show on small screens */}
         <button
           onClick={toggleMobileMenu}
-          className="md:hidden flex justify-center items-center w-8 h-8 text-white"
+          className="md:hidden flex justify-center items-center w-8 h-8 text-white hamburger-button"
           aria-label="Toggle mobile menu"
         >
           {isMobileMenuOpen ? (
@@ -83,27 +83,29 @@ export default function Navigation() {
       </nav>
 
       {/* Mobile Navigation Menu */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <ul className="bg-orange-500 text-white font-semibold text-lg px-4 pb-4 space-y-2">
-          <li><Link href="/" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Home</Link></li>
-          <li><Link href="/book" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Book</Link></li>
-          <li><Link href="/waiver" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Waiver</Link></li>
-          <li><Link href="/about" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">About</Link></li>
-          <li><Link href="/contact" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Contact</Link></li>
-          {isAdmin && (
-            <li>
-              <Link 
-                href="/admin" 
-                onClick={closeMobileMenu}
-                className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
-                title="Admin Dashboard"
-              >
-                Admin
-              </Link>
-            </li>
-          )}
-        </ul>
-      </div>
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-orange-500 shadow-lg z-50">
+          <ul className="text-white font-semibold text-lg px-4 pb-4 space-y-2">
+            <li><Link href="/" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Home</Link></li>
+            <li><Link href="/book" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Book</Link></li>
+            <li><Link href="/waiver" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Waiver</Link></li>
+            <li><Link href="/about" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">About</Link></li>
+            <li><Link href="/contact" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Contact</Link></li>
+            {isAdmin && (
+              <li>
+                <Link 
+                  href="/admin" 
+                  onClick={closeMobileMenu}
+                  className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
+                  title="Admin Dashboard"
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
     </header>
   );
 } 
