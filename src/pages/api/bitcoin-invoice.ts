@@ -78,13 +78,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await response.json();
     console.log('Speed API success response:', data);
 
-    if (!data || !data.invoice_url) {
-      console.error('No invoice URL in response:', data);
-      throw new Error('No invoice URL returned');
+    // Speed API returns a payment object, not an invoice_url
+    // We need to construct the checkout URL using the payment ID
+    if (!data || !data.id) {
+      console.error('No payment ID in response:', data);
+      throw new Error('No payment ID returned');
     }
 
+    // Construct the checkout URL using the payment ID
+    const checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
+    
     console.log('=== BITCOIN PAYMENT SUCCESS ===');
-    return res.status(200).json({ url: data.invoice_url });
+    console.log('Payment ID:', data.id);
+    console.log('Checkout URL:', checkoutUrl);
+    
+    return res.status(200).json({ url: checkoutUrl });
   } catch (error: unknown) {
     console.error('=== BITCOIN PAYMENT ERROR ===');
     console.error('Error type:', typeof error);
