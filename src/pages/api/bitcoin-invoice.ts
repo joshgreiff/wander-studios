@@ -37,9 +37,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Request body:', requestBody);
 
     // Use correct Speed API endpoints
-    const SPEED_API_URL = process.env.SPEED_ENV === 'test' || process.env.NODE_ENV === 'development' 
-      ? 'https://api-test.tryspeed.com/payments' 
-      : 'https://api.tryspeed.com/payments';
+    // Note: Speed only has production API, no separate test endpoint
+    const SPEED_API_URL = 'https://api.tryspeed.com/payments';
     
     console.log('Using Speed API URL:', SPEED_API_URL);
     console.log('Origin:', req.headers.origin);
@@ -85,8 +84,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('No payment ID returned');
     }
 
+    // Log all possible URL fields to see what Speed provides
+    console.log('=== SPEED RESPONSE URL FIELDS ===');
+    console.log('data.checkout_url:', data.checkout_url);
+    console.log('data.url:', data.url);
+    console.log('data.payment_url:', data.payment_url);
+    console.log('data.hosted_url:', data.hosted_url);
+    console.log('data.redirect_url:', data.redirect_url);
+    console.log('data.payment_link:', data.payment_link);
+    console.log('data.checkout_link:', data.checkout_link);
+    console.log('data.public_url:', data.public_url);
+    console.log('All data keys:', Object.keys(data));
+
     // Check if Speed provides a checkout URL directly
-    let checkoutUrl = data.checkout_url || data.url || data.payment_url || data.hosted_url || data.redirect_url;
+    let checkoutUrl = data.checkout_url || data.url || data.payment_url || data.hosted_url || data.redirect_url || data.payment_link || data.checkout_link || data.public_url;
     
     // If no direct URL provided, construct it manually
     if (!checkoutUrl) {

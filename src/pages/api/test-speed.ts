@@ -22,11 +22,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('NODE_ENV:', process.env.NODE_ENV);
     
     // Use correct Speed API endpoints
-    const SPEED_API_URL = process.env.SPEED_ENV === 'test' || process.env.NODE_ENV === 'development' 
-      ? 'https://api-test.tryspeed.com/payments' 
-      : 'https://api.tryspeed.com/payments';
+    // Note: Speed only has production API, no separate test endpoint
+    const SPEED_API_URL = 'https://api.tryspeed.com/payments';
     
-    console.log('Using Speed API URL:', SPEED_API_URL);
+    console.log('Testing Speed API connection with URL:', SPEED_API_URL);
     console.log('Expected environment based on key:', SPEED_SECRET_KEY.startsWith('sk_test_') ? 'TEST' : 'LIVE');
     
     // Use Basic Auth with API key as username (no password required)
