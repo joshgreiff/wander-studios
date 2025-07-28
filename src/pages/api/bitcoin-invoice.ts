@@ -86,22 +86,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Check if Speed provides a checkout URL directly
-    let checkoutUrl = data.checkout_url || data.url || data.payment_url;
+    let checkoutUrl = data.checkout_url || data.url || data.payment_url || data.hosted_url || data.redirect_url;
     
     // If no direct URL provided, construct it manually
     if (!checkoutUrl) {
-      // Try different checkout URL formats based on Speed API patterns
-      // Option 1: Direct checkout without /pay/ prefix
-      checkoutUrl = `https://checkout.tryspeed.com/${data.id}`;
+      // Based on Speed's hosted checkout documentation, try these formats:
+      // Option 1: Speed's hosted checkout format
+      checkoutUrl = `https://app.tryspeed.com/checkout/${data.id}`;
       
-      // Option 2: Alternative domain
+      // Option 2: Alternative hosted checkout format
+      // checkoutUrl = `https://checkout.tryspeed.com/${data.id}`;
+      
+      // Option 3: Using Speed's app domain
+      // checkoutUrl = `https://app.tryspeed.com/pay/${data.id}`;
+      
+      // Option 4: Direct payment link format
       // checkoutUrl = `https://pay.tryspeed.com/${data.id}`;
-      
-      // Option 3: With /pay/ prefix (original attempt)
-      // checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
-      
-      // Option 4: Using a different path structure
-      // checkoutUrl = `https://checkout.tryspeed.com/payment/${data.id}`;
     }
     
     console.log('=== BITCOIN PAYMENT SUCCESS ===');
