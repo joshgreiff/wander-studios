@@ -14,10 +14,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('Testing Speed API connection...');
     
-    // Use test endpoint if in test mode
+    // Use correct Speed API endpoints
     const SPEED_API_URL = process.env.SPEED_ENV === 'test' || process.env.NODE_ENV === 'development' 
-      ? 'https://api-test.speed.app/invoice' 
-      : 'https://api.speed.app/invoice';
+      ? 'https://api-test.tryspeed.com/payments' 
+      : 'https://api.tryspeed.com/payments';
     
     console.log('Testing Speed API connection with URL:', SPEED_API_URL);
     

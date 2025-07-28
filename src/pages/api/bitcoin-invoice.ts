@@ -8,7 +8,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { name, email, classId } = req.body;
   const SPEED_SECRET_KEY = process.env.SPEED_SECRET_KEY;
 
-  console.log('Bitcoin payment request:', { name, email, classId, hasKey: !!SPEED_SECRET_KEY });
+  console.log('=== BITCOIN PAYMENT DEBUG ===');
+  console.log('Request body:', { name, email, classId });
+  console.log('SPEED_SECRET_KEY exists:', !!SPEED_SECRET_KEY);
+  console.log('SPEED_SECRET_KEY length:', SPEED_SECRET_KEY?.length);
+  console.log('SPEED_ENV:', process.env.SPEED_ENV);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
 
   if (!SPEED_SECRET_KEY) {
     console.error('Missing SPEED_SECRET_KEY environment variable');
@@ -30,12 +35,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Request body:', requestBody);
 
-    // Use test endpoint if in test mode
+    // Use correct Speed API endpoints
     const SPEED_API_URL = process.env.SPEED_ENV === 'test' || process.env.NODE_ENV === 'development' 
-      ? 'https://api-test.speed.app/invoice' 
-      : 'https://api.speed.app/invoice';
+      ? 'https://api-test.tryspeed.com/payments' 
+      : 'https://api.tryspeed.com/payments';
     
     console.log('Using Speed API URL:', SPEED_API_URL);
+    console.log('Origin:', req.headers.origin);
     
     const response = await fetch(SPEED_API_URL, {
       method: 'POST',
@@ -47,12 +53,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     console.log('Speed API response status:', response.status);
+    console.log('Speed API response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Speed API error response:', errorText);
       return res.status(response.status).json({ 
-        error: `Speed API error: ${response.status} - ${errorText}` 
+        error: `Speed API error: ${response.status} - ${errorText}`,
+        details: {
+          status: response.status,
+          statusText: response.statusText,
+          url: SPEED_API_URL
+        }
       });
     }
 
@@ -64,16 +76,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('No invoice URL returned');
     }
 
+    console.log('=== BITCOIN PAYMENT SUCCESS ===');
     return res.status(200).json({ url: data.invoice_url });
   } catch (error: unknown) {
-    console.error('Bitcoin payment error:', error);
+    console.error('=== BITCOIN PAYMENT ERROR ===');
+    console.error('Error type:', typeof error);
+    console.error('Error constructor:', error?.constructor?.name);
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Full error:', error);
     
     if (error instanceof Error) {
       return res.status(500).json({ 
-        error: `Failed to create Speed invoice: ${error.message}` 
+        error: `Failed to create Speed invoice: ${error.message}`,
+        details: {
+          type: error.constructor.name,
+          stack: error.stack
+        }
       });
     }
     
-    return res.status(500).json({ error: 'Failed to create Speed invoice' });
+    return res.status(500).json({ 
+      error: 'Failed to create Speed invoice',
+      details: {
+        type: typeof error,
+        error: String(error)
+      }
+    });
   }
 } 
