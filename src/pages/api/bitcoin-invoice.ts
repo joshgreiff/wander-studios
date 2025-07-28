@@ -30,15 +30,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       description: 'Class Booking',
       customer_email: email,
       metadata: { name, classId },
-      success_url: `${req.headers.origin}/thank-you`,
-      cancel_url: `${req.headers.origin}/book/${classId}`,
+      success_url: `https://wandermovement.space/thank-you`,
+      cancel_url: `https://wandermovement.space/book/${classId}`,
     };
 
     console.log('Request body:', requestBody);
 
-    // Use correct Speed API endpoints
-    // Note: Speed only has production API, no separate test endpoint
-    const SPEED_API_URL = 'https://api.tryspeed.com/payments';
+    // Use Speed's Payment Links API instead of Payments API
+    // Payment Links create shareable URLs that customers can use directly
+    const SPEED_API_URL = 'https://api.tryspeed.com/payment-links';
     
     console.log('Using Speed API URL:', SPEED_API_URL);
     console.log('Origin:', req.headers.origin);
