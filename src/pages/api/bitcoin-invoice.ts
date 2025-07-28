@@ -85,12 +85,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('No payment ID returned');
     }
 
-    // Construct the checkout URL using the payment ID
-    const checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
+    // Check if Speed provides a checkout URL directly
+    let checkoutUrl = data.checkout_url || data.url || data.payment_url;
+    
+    // If no direct URL provided, construct it manually
+    if (!checkoutUrl) {
+      // Try different checkout URL formats
+      // Option 1: Standard checkout format
+      checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
+      
+      // Option 2: Alternative format (if the above doesn't work)
+      // checkoutUrl = `https://checkout.tryspeed.com/${data.id}`;
+      
+      // Option 3: Another possible format
+      // checkoutUrl = `https://pay.tryspeed.com/${data.id}`;
+    }
     
     console.log('=== BITCOIN PAYMENT SUCCESS ===');
     console.log('Payment ID:', data.id);
     console.log('Checkout URL:', checkoutUrl);
+    console.log('Full response data:', JSON.stringify(data, null, 2));
     
     return res.status(200).json({ url: checkoutUrl });
   } catch (error: unknown) {
