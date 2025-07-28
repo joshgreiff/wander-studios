@@ -1,8 +1,6 @@
 "use client";
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 export default function Navigation() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -64,13 +62,23 @@ export default function Navigation() {
         {/* Mobile Hamburger Button */}
         <button
           onClick={toggleMobileMenu}
-          className="md:hidden flex justify-center items-center w-8 h-8 text-white text-xl"
+          className="md:hidden flex justify-center items-center w-8 h-8 text-white"
           aria-label="Toggle mobile menu"
         >
-          <FontAwesomeIcon 
-            icon={isMobileMenuOpen ? faTimes : faBars} 
-            className="transition-all duration-300"
-          />
+          {isMobileMenuOpen ? (
+            // X icon
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          ) : (
+            // Hamburger icon
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          )}
         </button>
       </nav>
 
