@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     console.log('Testing Speed API connection...');
+    console.log('SPEED_SECRET_KEY starts with:', SPEED_SECRET_KEY.substring(0, 10) + '...');
     
     // Use correct Speed API endpoints
     const SPEED_API_URL = process.env.SPEED_ENV === 'test' || process.env.NODE_ENV === 'development' 
@@ -21,13 +22,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('Testing Speed API connection with URL:', SPEED_API_URL);
     
+    // Use Basic Auth with API key as username (no password required)
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${Buffer.from(`${SPEED_SECRET_KEY}:`).toString('base64')}`,
+    };
+    
+    console.log('Request headers:', headers);
+    
     // Test with a minimal request
     const response = await fetch(SPEED_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SPEED_SECRET_KEY}`,
-      },
+      headers,
       body: JSON.stringify({
         amount: 1.00,
         currency: 'USD',
@@ -44,7 +50,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const errorText = await response.text();
       return res.status(response.status).json({ 
         error: `Speed API test failed: ${response.status} - ${errorText}`,
-        status: response.status
+        status: response.status,
+        details: {
+          authMethod: 'Basic Auth with API key as username'
+        }
       });
     }
 

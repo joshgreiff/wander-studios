@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log('Request body:', { name, email, classId });
   console.log('SPEED_SECRET_KEY exists:', !!SPEED_SECRET_KEY);
   console.log('SPEED_SECRET_KEY length:', SPEED_SECRET_KEY?.length);
+  console.log('SPEED_SECRET_KEY starts with:', SPEED_SECRET_KEY?.substring(0, 10) + '...');
   console.log('SPEED_ENV:', process.env.SPEED_ENV);
   console.log('NODE_ENV:', process.env.NODE_ENV);
 
@@ -43,12 +44,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Using Speed API URL:', SPEED_API_URL);
     console.log('Origin:', req.headers.origin);
     
+    // Use Basic Auth with API key as username (no password required)
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${Buffer.from(`${SPEED_SECRET_KEY}:`).toString('base64')}`,
+    };
+    
+    console.log('Request headers:', headers);
+    
     const response = await fetch(SPEED_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SPEED_SECRET_KEY}`,
-      },
+      headers,
       body: JSON.stringify(requestBody),
     });
 
@@ -63,7 +69,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           status: response.status,
           statusText: response.statusText,
-          url: SPEED_API_URL
+          url: SPEED_API_URL,
+          authMethod: 'Basic Auth with API key as username'
         }
       });
     }
