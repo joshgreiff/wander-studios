@@ -90,15 +90,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // If no direct URL provided, construct it manually
     if (!checkoutUrl) {
-      // Try different checkout URL formats
-      // Option 1: Standard checkout format
-      checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
+      // Try different checkout URL formats based on Speed API patterns
+      // Option 1: Direct checkout without /pay/ prefix
+      checkoutUrl = `https://checkout.tryspeed.com/${data.id}`;
       
-      // Option 2: Alternative format (if the above doesn't work)
-      // checkoutUrl = `https://checkout.tryspeed.com/${data.id}`;
-      
-      // Option 3: Another possible format
+      // Option 2: Alternative domain
       // checkoutUrl = `https://pay.tryspeed.com/${data.id}`;
+      
+      // Option 3: With /pay/ prefix (original attempt)
+      // checkoutUrl = `https://checkout.tryspeed.com/pay/${data.id}`;
+      
+      // Option 4: Using a different path structure
+      // checkoutUrl = `https://checkout.tryspeed.com/payment/${data.id}`;
     }
     
     console.log('=== BITCOIN PAYMENT SUCCESS ===');
