@@ -14,10 +14,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Check if Resend API key is configured
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY environment variable is not set');
+    return res.status(500).json({ 
+      error: 'Email service not configured. Please contact support.' 
+    });
+  }
+
   try {
+    console.log('Attempting to send email via Resend...');
+    console.log('From:', 'Wander Movement <noreply@wandermovement.space>');
+    console.log('To:', 'ltwander@gmail.com');
+    console.log('Subject:', `Contact Form: ${subject}`);
+    
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: 'Wander Movement <noreply@wandermovement.space>',
+      from: 'Wander Movement <onboarding@resend.dev>',
       to: ['ltwander@gmail.com'],
       subject: `Contact Form: ${subject}`,
       html: `
@@ -54,9 +67,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      console.error('Resend API error:', error);
       return res.status(500).json({ 
-        error: 'Failed to send email' 
+        error: `Failed to send email: ${error.message || 'Unknown error'}`,
+        details: error
       });
     }
 
@@ -69,7 +83,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('Error sending contact form:', error);
     return res.status(500).json({ 
-      error: 'Failed to send message' 
+      error: 'Failed to send message',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 } 

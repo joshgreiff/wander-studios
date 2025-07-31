@@ -7,7 +7,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
   if (req.method === 'GET') {
     try {
-      const classItem = await prisma.class.findUnique({ where: { id: Number(id) } });
+      const classItem = await prisma.class.findUnique({ 
+        where: { id: Number(id) },
+        include: {
+          bookings: true
+        }
+      });
       if (!classItem) return res.status(404).json({ error: 'Class not found' });
       return res.status(200).json(classItem);
     } catch {

@@ -8,6 +8,7 @@ type Class = {
   time: string;
   description: string;
   capacity: number;
+  bookings?: Array<{ id: number }>;
 };
 
 export default function BookPage() {
@@ -88,19 +89,35 @@ export default function BookPage() {
         ) : (
           <ul className="w-full flex flex-col gap-4">
             {classes.map(c => {
+              const currentBookings = c.bookings?.length || 0;
+              const availableSpots = c.capacity - currentBookings;
+              const isFull = availableSpots <= 0;
+              
               return (
                 <li key={c.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 shadow">
                   <div>
                     <div className="font-semibold text-orange-900 text-lg">{formatDateTime(c.date, c.time)}</div>
                     <div className="text-orange-800">{c.description}</div>
-                    <div className="text-orange-700 text-sm">Capacity: {c.capacity}</div>
+                    <div className="text-orange-700 text-sm">
+                      {isFull ? (
+                        <span className="text-red-600 font-semibold">Class Full ({c.capacity}/{c.capacity})</span>
+                      ) : (
+                        <span>Available Spots: {availableSpots}/{c.capacity}</span>
+                      )}
+                    </div>
                   </div>
-                  <Link
-                    href={`/book/${c.id}`}
-                    className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition text-center"
-                  >
-                    Book
-                  </Link>
+                  {isFull ? (
+                    <div className="mt-4 sm:mt-0 text-center">
+                      <span className="bg-red-100 text-red-800 px-3 py-2 rounded text-sm font-semibold">Full</span>
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/book/${c.id}`}
+                      className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition text-center"
+                    >
+                      Book
+                    </Link>
+                  )}
                 </li>
               );
             })}

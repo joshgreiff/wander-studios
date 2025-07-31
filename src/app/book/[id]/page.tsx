@@ -8,6 +8,7 @@ type Class = {
   time: string;
   description: string;
   capacity: number;
+  bookings?: Array<{ id: number }>;
 };
 
 export default function BookClassPage() {
@@ -27,6 +28,11 @@ export default function BookClassPage() {
         setLoading(false);
       });
   }, [id]);
+
+  // Calculate available spots
+  const currentBookings = classData?.bookings?.length || 0;
+  const availableSpots = classData ? classData.capacity - currentBookings : 0;
+  const isFull = availableSpots <= 0;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = e.target;
@@ -93,7 +99,10 @@ export default function BookClassPage() {
     const body = {
       name: form.name,
       email: form.email,
+      phone: form.phone,
       classId: classData?.id,
+      waiverName: form.signature,
+      waiverAgreed: form.waiver,
     };
     try {
       console.log(`Making ${method} payment request:`, body);
@@ -107,9 +116,16 @@ export default function BookClassPage() {
       console.log(`${method} payment response status:`, res.status);
       
       if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`${method} payment error response:`, errorText);
-        alert(`Payment error: ${res.status} - ${errorText}`);
+        const errorData = await res.json();
+        console.error(`${method} payment error response:`, errorData);
+        
+        if (errorData.error === 'Class is full') {
+          alert(`Sorry, this class is now full. Please try another class.`);
+        } else if (errorData.error === 'You are already booked for this class') {
+          alert('You are already booked for this class.');
+        } else {
+          alert(`Payment error: ${res.status} - ${errorData.error || 'Unknown error'}`);
+        }
         return;
       }
       
@@ -142,8 +158,21 @@ export default function BookClassPage() {
             <h1 className="text-2xl font-bold mb-2 text-orange-900 text-center">Book: {classData.description}</h1>
             <div className="mb-4 text-orange-800 text-center">
               <div className="font-semibold text-lg">{formatDateTime(classData.date, classData.time)}</div>
-              <div>Capacity: {classData.capacity}</div>
+              <div className="text-sm">
+                {isFull ? (
+                  <span className="text-red-600 font-semibold">Class Full ({classData.capacity}/{classData.capacity})</span>
+                ) : (
+                  <span>Available Spots: {availableSpots}/{classData.capacity}</span>
+                )}
+              </div>
             </div>
+            
+            {isFull ? (
+              <div className="w-full max-w-md bg-red-50 border border-red-200 rounded p-4 text-center">
+                <p className="text-red-800 font-semibold">This class is currently full.</p>
+                <p className="text-red-700 text-sm mt-1">Please check back later or try another class.</p>
+              </div>
+            ) : (
             <form onSubmit={e => e.preventDefault()} className="w-full max-w-md flex flex-col gap-4 bg-white/90 rounded p-6 border shadow">
                 <>
                   <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
@@ -187,7 +216,7 @@ export default function BookClassPage() {
                     type="button"
                     className="bg-orange-600 text-white font-semibold py-3 rounded hover:bg-orange-700 mt-2 disabled:opacity-60"
                     onClick={() => handlePayment('square')}
-                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver}
+                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver || isFull}
                   >
                     {paying === 'square' ? 'Processing...' : 'Pay with Card (Square) $10'}
                   </button>
@@ -195,12 +224,13 @@ export default function BookClassPage() {
                     type="button"
                     className="bg-yellow-500 text-white font-semibold py-3 rounded hover:bg-yellow-600 mt-2 disabled:opacity-60"
                     onClick={() => handlePayment('bitcoin')}
-                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver}
+                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver || isFull}
                   >
                     {paying === 'bitcoin' ? 'Processing...' : 'Pay with Bitcoin (Speed) $9.50'}
                   </button>
                 </>
             </form>
+            )}
           </>
         )}
       </section>

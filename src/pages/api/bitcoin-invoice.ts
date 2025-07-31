@@ -1,11 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, classId } = req.body;
+  const { name, email, classId, phone, waiverName, waiverAgreed } = req.body;
   const SPEED_SECRET_KEY = process.env.SPEED_SECRET_KEY;
 
   console.log('=== BITCOIN PAYMENT DEBUG ===');
@@ -22,6 +25,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Check class capacity before creating payment
+    const classItem = await prisma.class.findUnique({
+      where: { id: Number(classId) },
+      include: {
+        bookings: true
+      }
+    });
+
+    if (!classItem) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    const currentBookings = classItem.bookings.length;
+    if (currentBookings >= classItem.capacity) {
+      return res.status(400).json({ 
+        error: 'Class is full',
+        details: {
+          currentBookings,
+          capacity: classItem.capacity,
+          availableSpots: 0
+        }
+      });
+    }
+
+    // Check if user is already booked
+    const existingBooking = await prisma.booking.findFirst({
+      where: {
+        classId: Number(classId),
+        email: email
+      }
+    });
+
+    if (existingBooking) {
+      return res.status(400).json({ error: 'You are already booked for this class' });
+    }
+
     console.log('Making request to Speed API...');
     
     const requestBody = {
@@ -30,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       description: 'Class Booking',
       customer_email: email,
       metadata: { name, classId },
-      success_url: `https://wandermovement.space/thank-you`,
+      success_url: `https://wandermovement.space/thank-you?classId=${classId}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone || '')}&waiverName=${encodeURIComponent(waiverName)}&waiverAgreed=${waiverAgreed}`,
       cancel_url: `https://wandermovement.space/book/${classId}`,
     };
 

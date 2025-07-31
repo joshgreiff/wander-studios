@@ -5,7 +5,12 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    const classes = await prisma.class.findMany({ orderBy: [{ date: 'asc' }, { time: 'asc' }] });
+    const classes = await prisma.class.findMany({ 
+      include: {
+        bookings: true
+      },
+      orderBy: [{ date: 'asc' }, { time: 'asc' }] 
+    });
     return res.status(200).json(classes);
   }
   if (req.method === 'POST') {

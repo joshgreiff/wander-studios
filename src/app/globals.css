@@ -44,7 +44,7 @@ main {
 .bg-gradient-to-br {
   background-image: -webkit-linear-gradient(bottom right, #fed7aa 0%, #fb923c 50%, #ea580c 100%) !important;
   background-image: linear-gradient(to bottom right, #fed7aa 0%, #fb923c 50%, #ea580c 100%) !important;
-}
+  }
 
 .bg-gradient-to-r {
   background-image: -webkit-linear-gradient(right, #fb923c 0%, #ea580c 50%, #dc2626 100%) !important;
