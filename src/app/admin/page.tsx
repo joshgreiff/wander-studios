@@ -754,7 +754,7 @@ export default function AdminPage() {
                         No bookings found. Check the console for debug info.
                       </h4>
                       <p className="text-sm text-yellow-800">
-                        The system couldn't parse any names from your data. Check the browser console (F12) for detailed debug information.
+                        The system couldn&apos;t parse any names from your data. Check the browser console (F12) for detailed debug information.
                       </p>
                     </div>
                   )}
@@ -1013,7 +1013,7 @@ export default function AdminPage() {
                               </div>
                               {booking.waiverName && (
                                 <p className="text-xs text-gray-600">
-                                  Signed: "{booking.waiverName}"
+                                  Signed: &quot;{booking.waiverName}&quot;
                                 </p>
                               )}
                             </div>
