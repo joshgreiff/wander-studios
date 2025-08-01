@@ -410,7 +410,7 @@ export default function AdminPage() {
   }, [bulkImportData, importMethod]);
 
   // Revenue calculation functions
-  function calculateRevenue(bookings: Booking[], classData: Class[]) {
+  function calculateRevenue(bookings: Booking[], _classData: Class[]) {
     const total = bookings.reduce((total, booking) => {
       if (booking.paid) {
         // Use actual payment amount from Square if available, otherwise default to $10.09 (net after fees)
@@ -422,7 +422,7 @@ export default function AdminPage() {
     return Math.round(total * 100) / 100; // Round to 2 decimal places
   }
 
-  function getRevenueByPeriod(bookings: Booking[], classData: Class[], period: 'week' | 'month') {
+  function getRevenueByPeriod(bookings: Booking[], _classData: Class[], period: 'week' | 'month') {
     const now = new Date();
     
     const filteredBookings = bookings.filter(booking => {
@@ -440,7 +440,7 @@ export default function AdminPage() {
     return Math.round(total * 100) / 100; // Round to 2 decimal places
   }
 
-  function getRevenueByClass(bookings: Booking[], classData: Class[]) {
+  function getRevenueByClass(bookings: Booking[], _classData: Class[]) {
     const revenueByClass = new Map();
     
     bookings.forEach(booking => {
