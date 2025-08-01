@@ -40,6 +40,7 @@ type Booking = {
   waiverAgreed: boolean;
   paid: boolean;
   createdAt: string;
+  paymentAmount?: number; // Added for Stripe revenue
   class?: Class;
 };
 
@@ -62,7 +63,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ date: '', time: '', description: '', capacity: 10 });
-  const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings'>('classes');
+  const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
   const [loginError, setLoginError] = useState('');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [classBookings, setClassBookings] = useState<Booking[]>([]);
@@ -85,6 +86,7 @@ export default function AdminPage() {
       fetchClasses();
       fetchWaivers();
       fetchBookings();
+      fetchSquareRevenue();
     }
   }, [authenticated]);
 
@@ -106,6 +108,22 @@ export default function AdminPage() {
     const res = await fetch('/api/bookings');
     const data = await res.json();
     setBookings(data);
+  }
+
+  async function fetchSquareRevenue() {
+    try {
+      const res = await fetch('/api/bookings/square-revenue');
+      const data = await res.json();
+      // Update bookings with real payment amounts
+      setBookings(prevBookings => 
+        prevBookings.map(booking => {
+          const squareBooking = data.find((b: any) => b.id === booking.id);
+          return squareBooking ? { ...booking, paymentAmount: squareBooking.paymentAmount } : booking;
+        })
+      );
+    } catch (error) {
+      console.error('Error fetching Square revenue:', error);
+    }
   }
 
   async function viewClassDetails(classData: Class) {
@@ -391,6 +409,59 @@ export default function AdminPage() {
     }
   }, [bulkImportData, importMethod]);
 
+  // Revenue calculation functions
+  function calculateRevenue(bookings: Booking[], classData: Class[]) {
+    const classMap = new Map(classData.map(c => [c.id, c]));
+    
+    const total = bookings.reduce((total, booking) => {
+      if (booking.paid) {
+        // Use actual payment amount from Square if available, otherwise default to $10.09 (net after fees)
+        return total + (booking.paymentAmount || 10.09);
+      }
+      return total;
+    }, 0);
+    
+    return Math.round(total * 100) / 100; // Round to 2 decimal places
+  }
+
+  function getRevenueByPeriod(bookings: Booking[], classData: Class[], period: 'week' | 'month') {
+    const now = new Date();
+    const classMap = new Map(classData.map(c => [c.id, c]));
+    
+    const filteredBookings = bookings.filter(booking => {
+      const bookingDate = new Date(booking.createdAt);
+      if (period === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return bookingDate >= weekAgo && booking.paid;
+      } else {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return bookingDate >= monthAgo && booking.paid;
+      }
+    });
+    
+    const total = filteredBookings.reduce((total, booking) => total + (booking.paymentAmount || 10.09), 0);
+    return Math.round(total * 100) / 100; // Round to 2 decimal places
+  }
+
+  function getRevenueByClass(bookings: Booking[], classData: Class[]) {
+    const classMap = new Map(classData.map(c => [c.id, c]));
+    const revenueByClass = new Map();
+    
+    bookings.forEach(booking => {
+      if (booking.paid && booking.class) {
+        const classKey = `${booking.class.date?.slice(0, 10)} ${booking.class.time}`;
+        const current = revenueByClass.get(classKey) || 0;
+        revenueByClass.set(classKey, current + (booking.paymentAmount || 10.09));
+      }
+    });
+    
+    return Array.from(revenueByClass.entries()).map(([className, revenue]) => ({
+      className,
+      revenue: Math.round((revenue as number) * 100) / 100, // Round to 2 decimal places
+      bookings: bookings.filter(b => b.paid && b.class && `${b.class.date?.slice(0, 10)} ${b.class.time}` === className).length
+    }));
+  }
+
   async function handleBulkImport(e: React.FormEvent) {
     e.preventDefault();
     if (!bulkImportClassId) {
@@ -535,6 +606,16 @@ export default function AdminPage() {
             }`}
           >
             View Waivers ({waivers.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('revenue')}
+            className={`px-4 py-2 rounded-lg font-semibold transition ${
+              activeTab === 'revenue' 
+                ? 'bg-orange-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Revenue Dashboard
           </button>
         </div>
 
@@ -924,6 +1005,51 @@ export default function AdminPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'revenue' && (
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-orange-900">Revenue Dashboard</h2>
+              <button
+                onClick={() => {
+                  fetchSquareRevenue();
+                  fetchBookings();
+                }}
+                className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+              >
+                Refresh Data
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="font-semibold text-blue-900 mb-3">Total Revenue</h3>
+                <div className="text-4xl font-bold text-blue-600">${calculateRevenue(bookings, classes)}</div>
+                <p className="text-sm text-blue-800 mt-2">Based on all paid bookings</p>
+              </div>
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="font-semibold text-green-900 mb-3">Revenue by Period</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="text-sm text-green-800">
+                    <strong>Last Week:</strong> ${getRevenueByPeriod(bookings, classes, 'week')}
+                  </div>
+                  <div className="text-sm text-green-800">
+                    <strong>Last Month:</strong> ${getRevenueByPeriod(bookings, classes, 'month')}
+                  </div>
+                </div>
+              </div>
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="font-semibold text-yellow-900 mb-3">Revenue by Class</h3>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {getRevenueByClass(bookings, classes).map((item, index) => (
+                    <div key={index} className="text-sm text-yellow-800">
+                      <strong>{item.className}:</strong> ${item.revenue} ({item.bookings} bookings)
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
