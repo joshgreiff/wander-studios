@@ -117,7 +117,7 @@ export default function AdminPage() {
       // Update bookings with real payment amounts
       setBookings(prevBookings => 
         prevBookings.map(booking => {
-          const squareBooking = data.find((b: any) => b.id === booking.id);
+          const squareBooking = data.find((b: { id: number; paymentAmount: number }) => b.id === booking.id);
           return squareBooking ? { ...booking, paymentAmount: squareBooking.paymentAmount } : booking;
         })
       );
@@ -411,8 +411,6 @@ export default function AdminPage() {
 
   // Revenue calculation functions
   function calculateRevenue(bookings: Booking[], classData: Class[]) {
-    const classMap = new Map(classData.map(c => [c.id, c]));
-    
     const total = bookings.reduce((total, booking) => {
       if (booking.paid) {
         // Use actual payment amount from Square if available, otherwise default to $10.09 (net after fees)
@@ -426,7 +424,6 @@ export default function AdminPage() {
 
   function getRevenueByPeriod(bookings: Booking[], classData: Class[], period: 'week' | 'month') {
     const now = new Date();
-    const classMap = new Map(classData.map(c => [c.id, c]));
     
     const filteredBookings = bookings.filter(booking => {
       const bookingDate = new Date(booking.createdAt);
@@ -444,7 +441,6 @@ export default function AdminPage() {
   }
 
   function getRevenueByClass(bookings: Booking[], classData: Class[]) {
-    const classMap = new Map(classData.map(c => [c.id, c]));
     const revenueByClass = new Map();
     
     bookings.forEach(booking => {
