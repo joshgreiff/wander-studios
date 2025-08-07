@@ -7,6 +7,7 @@ type Class = {
   date: string;
   time: string;
   description: string;
+  address?: string;
   capacity: number;
   bookings?: Array<{ id: number }>;
 };
@@ -158,6 +159,9 @@ export default function BookClassPage() {
             <h1 className="text-2xl font-bold mb-2 text-orange-900 text-center">Book: {classData.description}</h1>
             <div className="mb-4 text-orange-800 text-center">
               <div className="font-semibold text-lg">{formatDateTime(classData.date, classData.time)}</div>
+              {classData.address && (
+                <div className="text-sm text-orange-700 mt-1">📍 {classData.address}</div>
+              )}
               <div className="text-sm">
                 {isFull ? (
                   <span className="text-red-600 font-semibold">Class Full ({classData.capacity}/{classData.capacity})</span>

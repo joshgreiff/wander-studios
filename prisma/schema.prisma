@@ -18,8 +18,10 @@ model Class {
   date        DateTime
   time        String
   description String
+  address     String?
   capacity    Int
   bookings    Booking[]
+  packageBookings PackageBooking[]
   createdAt   DateTime  @default(now())
 }
 
@@ -38,6 +40,40 @@ model Booking {
   // Optional link to full waiver record
   waiver       Waiver?  @relation(fields: [waiverId], references: [id])
   waiverId     Int?
+}
+
+model ClassPackage {
+  id          Int       @id @default(autoincrement())
+  name        String    // e.g., "5-Class Package", "10-Class Package"
+  description String    // e.g., "Perfect for beginners"
+  classCount  Int       // Number of classes included
+  price       Float     // Price in USD
+  discount    Float?    // Optional discount percentage
+  isActive    Boolean   @default(true)
+  packageBookings PackageBooking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model PackageBooking {
+  id            Int          @id @default(autoincrement())
+  package       ClassPackage @relation(fields: [packageId], references: [id])
+  packageId     Int
+  class         Class        @relation(fields: [classId], references: [id])
+  classId       Int
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  waiverName    String       // typed signature
+  waiverAgreed  Boolean
+  paid          Boolean      @default(false)
+  redeemed      Boolean      @default(false) // Whether this class has been used
+  redeemedAt    DateTime?    // When the class was redeemed
+  createdAt     DateTime     @default(now())
+  
+  // Optional link to full waiver record
+  waiver        Waiver?      @relation(fields: [waiverId], references: [id])
+  waiverId      Int?
 }
 
 model Waiver {
@@ -73,4 +109,5 @@ model Waiver {
   
   // Optional: Link to bookings (if you want to track which bookings used this waiver)
   bookings          Booking[]
+  packageBookings   PackageBooking[]
 }

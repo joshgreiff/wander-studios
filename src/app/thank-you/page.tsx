@@ -12,26 +12,52 @@ function ThankYouContent() {
     // Get booking data from URL parameters
     if (!searchParams) return;
     
-    const name = searchParams.get('name');
-    const email = searchParams.get('email');
-    const classId = searchParams.get('classId');
-    const waiverName = searchParams.get('waiverName');
-    const waiverAgreed = searchParams.get('waiverAgreed');
-    const phone = searchParams.get('phone');
+    const type = searchParams.get('type');
+    
+    if (type === 'package') {
+      // Handle package purchase
+      const customerName = searchParams.get('customerName');
+      const customerEmail = searchParams.get('customerEmail');
+      const packageId = searchParams.get('packageId');
+      const waiverName = searchParams.get('waiverName');
+      const waiverAgreed = searchParams.get('waiverAgreed');
+      const customerPhone = searchParams.get('customerPhone');
 
-    // If we have the required parameters, create the booking
-    if (name && email && classId && waiverName && waiverAgreed) {
-      createBooking({
-        name,
-        email,
-        classId,
-        waiverName,
-        waiverAgreed: waiverAgreed === 'true',
-        phone: phone || undefined
-      });
+      if (customerName && customerEmail && packageId && waiverName && waiverAgreed) {
+        createPackageBooking({
+          customerName,
+          customerEmail,
+          packageId,
+          waiverName,
+          waiverAgreed: waiverAgreed === 'true',
+          customerPhone: customerPhone || undefined
+        });
+      } else {
+        setBookingStatus('success');
+      }
     } else {
-      // No booking data, just show success message
-      setBookingStatus('success');
+      // Handle individual class booking
+      const name = searchParams.get('name');
+      const email = searchParams.get('email');
+      const classId = searchParams.get('classId');
+      const waiverName = searchParams.get('waiverName');
+      const waiverAgreed = searchParams.get('waiverAgreed');
+      const phone = searchParams.get('phone');
+
+      // If we have the required parameters, create the booking
+      if (name && email && classId && waiverName && waiverAgreed) {
+        createBooking({
+          name,
+          email,
+          classId,
+          waiverName,
+          waiverAgreed: waiverAgreed === 'true',
+          phone: phone || undefined
+        });
+      } else {
+        // No booking data, just show success message
+        setBookingStatus('success');
+      }
     }
   }, [searchParams]);
 
@@ -60,6 +86,62 @@ function ThankYouContent() {
       setBookingStatus('success');
     } catch (error) {
       console.error('Error creating booking:', error);
+      setBookingStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
+    }
+  }
+
+  async function createPackageBooking(bookingData: {
+    customerName: string;
+    customerEmail: string;
+    packageId: string;
+    waiverName: string;
+    waiverAgreed: boolean;
+    customerPhone?: string;
+  }) {
+    try {
+      const response = await fetch('/api/packages/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...bookingData,
+          action: 'purchase'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create package booking');
+      }
+
+      // Mark all package bookings as paid
+      const packageBookings = await response.json();
+      await Promise.all(
+        packageBookings.packageBookings.map((booking: { id: number }) =>
+          fetch('/api/packages/book', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              packageId: bookingData.packageId,
+              customerName: bookingData.customerName,
+              customerEmail: bookingData.customerEmail,
+              customerPhone: bookingData.customerPhone,
+              waiverName: bookingData.waiverName,
+              waiverAgreed: bookingData.waiverAgreed,
+              action: 'mark-paid',
+              bookingId: booking.id
+            }),
+          })
+        )
+      );
+
+      setBookingStatus('success');
+    } catch (error) {
+      console.error('Error creating package booking:', error);
       setBookingStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
     }

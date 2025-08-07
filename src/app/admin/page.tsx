@@ -6,6 +6,7 @@ type Class = {
   date: string;
   time: string;
   description: string;
+  address?: string;
   capacity: number;
 };
 
@@ -50,7 +51,7 @@ export default function AdminPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [waivers, setWaivers] = useState<Waiver[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [form, setForm] = useState({ date: '', time: '', description: '', capacity: 10 });
+  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 10 });
   const [bookingForm, setBookingForm] = useState({ 
     classId: '', 
     name: '', 
@@ -62,7 +63,7 @@ export default function AdminPage() {
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', capacity: 10 });
+  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 10 });
   const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
   const [loginError, setLoginError] = useState('');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
@@ -194,13 +195,14 @@ export default function AdminPage() {
       date: classData.date.slice(0, 10), // Convert to YYYY-MM-DD format for input
       time: classData.time,
       description: classData.description,
+      address: classData.address || '',
       capacity: classData.capacity
     });
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setEditForm({ date: '', time: '', description: '', capacity: 10 });
+    setEditForm({ date: '', time: '', description: '', address: '', capacity: 10 });
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
@@ -215,7 +217,7 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setEditingId(null);
-      setEditForm({ date: '', time: '', description: '', capacity: 10 });
+      setEditForm({ date: '', time: '', description: '', address: '', capacity: 10 });
       fetchClasses();
     } else {
       alert('Failed to update class');
@@ -232,7 +234,7 @@ export default function AdminPage() {
       body: JSON.stringify(form),
     });
     if (res.ok) {
-      setForm({ date: '', time: '', description: '', capacity: 10 });
+      setForm({ date: '', time: '', description: '', address: '', capacity: 10 });
       fetchClasses();
     } else {
       alert('Failed to add class');
@@ -613,6 +615,7 @@ export default function AdminPage() {
           >
             Revenue Dashboard
           </button>
+
         </div>
 
         {activeTab === 'classes' && (
@@ -635,6 +638,10 @@ export default function AdminPage() {
               <div className="flex flex-col">
                 <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="description">Description</label>
                 <textarea id="description" name="description" value={form.description} onChange={handleChange} className="border rounded px-2 py-1" placeholder="Class description" required />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="address">Address (optional)</label>
+                <input type="text" id="address" name="address" value={form.address} onChange={handleChange} className="border rounded px-2 py-1" placeholder="Class location address" />
               </div>
               <button type="submit" className="bg-orange-600 text-white font-semibold py-2 rounded hover:bg-orange-700" disabled={loading}>{loading ? 'Saving...' : 'Add Class'}</button>
             </form>
@@ -663,6 +670,10 @@ export default function AdminPage() {
                         <label className="text-sm font-bold text-orange-700 mb-1">Description</label>
                         <textarea name="description" value={editForm.description} onChange={handleEditChange} className="border rounded px-2 py-1" placeholder="Class description" required />
                       </div>
+                      <div className="flex flex-col">
+                        <label className="text-sm font-bold text-orange-700 mb-1">Address (optional)</label>
+                        <input type="text" name="address" value={editForm.address} onChange={handleEditChange} className="border rounded px-2 py-1" placeholder="Class location address" />
+                      </div>
                       <div className="flex gap-2">
                         <button type="submit" className="bg-green-600 text-white font-semibold py-1 px-3 rounded hover:bg-green-700 text-sm" disabled={loading}>
                           {loading ? 'Saving...' : 'Save'}
@@ -677,6 +688,7 @@ export default function AdminPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="font-semibold text-orange-900">{c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})</span>
+                        {c.address && <div className="text-sm text-orange-700 mt-1">📍 {c.address}</div>}
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => viewClassDetails(c)} className="text-green-600 hover:underline text-sm">View Details</button>
@@ -1048,6 +1060,8 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+
 
         {/* Class Details Modal */}
         {selectedClass && (

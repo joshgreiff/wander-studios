@@ -1,17 +1,20 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Class = {
   id: number;
   date: string;
   time: string;
   description: string;
+  address?: string;
   capacity: number;
 };
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/classes')
@@ -37,9 +40,15 @@ export default function ClassesPage() {
                 <div>
                   <div className="font-semibold text-orange-900 text-lg">{c.date?.slice(0, 10)} {c.time}</div>
                   <div className="text-orange-800">{c.description}</div>
+                  {c.address && <div className="text-orange-700 text-sm">📍 {c.address}</div>}
                   <div className="text-orange-700 text-sm">Capacity: {c.capacity}</div>
                 </div>
-                <button className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition">Book</button>
+                <button 
+                  onClick={() => router.push(`/book/${c.id}`)}
+                  className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition"
+                >
+                  Book
+                </button>
               </li>
             ))}
           </ul>

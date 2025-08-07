@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json(classes);
   }
   if (req.method === 'POST') {
-    const { date, time, description, capacity } = req.body;
+    const { date, time, description, address, capacity } = req.body;
     if (!date || !time || !description || !capacity) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -23,6 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         date: new Date(date),
         time,
         description,
+        address: address || null,
         capacity: Number(capacity),
       },
     });
