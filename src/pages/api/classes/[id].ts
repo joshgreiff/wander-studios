@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   if (req.method === 'PUT') {
     try {
-      const { date, time, description, address, capacity } = req.body;
+      const { date, time, description, address, capacity, archived } = req.body;
       if (!date || !time || !description || !capacity) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
@@ -33,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description,
           address: address || null,
           capacity: Number(capacity),
+          archived: archived !== undefined ? Boolean(archived) : false,
         },
       });
       return res.status(200).json(updatedClass);
@@ -42,10 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   if (req.method === 'DELETE') {
     try {
-      await prisma.class.delete({ where: { id: Number(id) } });
-      return res.status(204).end();
+      // Instead of hard deleting, archive the class
+      await prisma.class.update({
+        where: { id: Number(id) },
+        data: { archived: true }
+      });
+      return res.status(200).json({ message: 'Class archived successfully' });
     } catch {
-      return res.status(404).json({ error: 'Class not found' });
+      return res.status(500).json({ error: 'Failed to archive class' });
     }
   }
   return res.status(405).json({ error: 'Method not allowed' });

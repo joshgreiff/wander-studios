@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,100 +8,85 @@ datasource db {
 }
 
 model Class {
-  id          Int       @id @default(autoincrement())
-  date        DateTime
-  time        String
-  description String
-  address     String?
-  capacity    Int
-  bookings    Booking[]
+  id              Int              @id @default(autoincrement())
+  date            DateTime
+  time            String
+  description     String
+  capacity        Int
+  createdAt       DateTime         @default(now())
+  address         String?
+  archived        Boolean          @default(false)
+  bookings        Booking[]
   packageBookings PackageBooking[]
-  createdAt   DateTime  @default(now())
 }
 
 model Booking {
   id           Int      @id @default(autoincrement())
-  class        Class    @relation(fields: [classId], references: [id])
   classId      Int
   name         String
   email        String
   phone        String?
-  waiverName   String   // typed signature
+  waiverName   String
   waiverAgreed Boolean
   paid         Boolean  @default(false)
   createdAt    DateTime @default(now())
-  
-  // Optional link to full waiver record
-  waiver       Waiver?  @relation(fields: [waiverId], references: [id])
   waiverId     Int?
+  class        Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  waiver       Waiver?  @relation(fields: [waiverId], references: [id])
 }
 
 model ClassPackage {
-  id          Int       @id @default(autoincrement())
-  name        String    // e.g., "5-Class Package", "10-Class Package"
-  description String    // e.g., "Perfect for beginners"
-  classCount  Int       // Number of classes included
-  price       Float     // Price in USD
-  discount    Float?    // Optional discount percentage
-  isActive    Boolean   @default(true)
+  id              Int              @id @default(autoincrement())
+  name            String
+  description     String
+  classCount      Int
+  price           Float
+  discount        Float?
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   packageBookings PackageBooking[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 }
 
 model PackageBooking {
   id            Int          @id @default(autoincrement())
-  package       ClassPackage @relation(fields: [packageId], references: [id])
   packageId     Int
-  class         Class        @relation(fields: [classId], references: [id])
   classId       Int
   customerName  String
   customerEmail String
   customerPhone String?
-  waiverName    String       // typed signature
+  waiverName    String
   waiverAgreed  Boolean
   paid          Boolean      @default(false)
-  redeemed      Boolean      @default(false) // Whether this class has been used
-  redeemedAt    DateTime?    // When the class was redeemed
+  redeemed      Boolean      @default(false)
+  redeemedAt    DateTime?
   createdAt     DateTime     @default(now())
-  
-  // Optional link to full waiver record
-  waiver        Waiver?      @relation(fields: [waiverId], references: [id])
   waiverId      Int?
+  class         Class        @relation(fields: [classId], references: [id])
+  package       ClassPackage @relation(fields: [packageId], references: [id])
+  waiver        Waiver?      @relation(fields: [waiverId], references: [id])
 }
 
 model Waiver {
-  id                Int      @id @default(autoincrement())
-  
-  // Personal Information
-  firstName         String
-  lastName          String
-  email             String
-  phone             String?
-  dateOfBirth       DateTime?
-  
-  // Emergency Contact
-  emergencyContact  String
-  emergencyPhone    String
-  relationship      String?
-  
-  // Health Information
-  healthConditions  String?  // Text field for health conditions
-  injuries          String?  // Text field for recent injuries/surgeries
-  medications       String?  // Text field for current medications
-  isPregnant        Boolean  @default(false)
-  pregnancyWeeks    Int?     // Only if isPregnant is true
-  
-  // Legal Agreement
-  digitalSignature  String   // Full name as digital signature
-  waiverAgreed      Boolean  @default(false)
-  healthInfoAgreed  Boolean  @default(false)
-  
-  // Metadata
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  // Optional: Link to bookings (if you want to track which bookings used this waiver)
-  bookings          Booking[]
-  packageBookings   PackageBooking[]
+  id               Int              @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  dateOfBirth      DateTime?
+  emergencyContact String
+  emergencyPhone   String
+  relationship     String?
+  healthConditions String?
+  injuries         String?
+  medications      String?
+  isPregnant       Boolean          @default(false)
+  pregnancyWeeks   Int?
+  digitalSignature String
+  waiverAgreed     Boolean          @default(false)
+  healthInfoAgreed Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  bookings         Booking[]
+  packageBookings  PackageBooking[]
 }
