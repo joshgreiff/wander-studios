@@ -94,8 +94,8 @@ export default function DashboardPage() {
         const packageBookingsData = await packageBookingsResponse.json();
         setPackageBookings(packageBookingsData);
       }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+    } catch (_error) {
+      console.error('Error fetching user data:', _error);
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function DashboardPage() {
         const errorData = await response.json();
         setPasswordMessage(errorData.error || 'Failed to update password');
       }
-    } catch (error) {
+    } catch (_error) {
       setPasswordMessage('Network error. Please try again.');
     }
   };
@@ -362,7 +362,7 @@ export default function DashboardPage() {
         {bookings.length === 0 && packageBookings.length === 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <h2 className="text-xl font-semibold text-orange-800 mb-4">No Bookings Yet</h2>
-            <p className="text-orange-600 mb-4">You haven't booked any classes yet.</p>
+            <p className="text-orange-600 mb-4">You haven&apos;t booked any classes yet.</p>
             <div className="space-x-4">
               <Link
                 href="/classes"

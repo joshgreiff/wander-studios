@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCurrentIndividualClassPrice, getPackagePrice, calculatePackageSavings, getPackageSavingsPercentage, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
+import { getCurrentIndividualClassPrice, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
 import Link from 'next/link';
 
 type User = {
@@ -55,8 +55,6 @@ export default function BookClassPage() {
 
   const individualPrice = getCurrentIndividualClassPrice();
   const packagePrice = getPackagePrice();
-  const savings = calculatePackageSavings();
-  const savingsPercentage = getPackageSavingsPercentage();
 
   useEffect(() => {
     if (params?.id) {

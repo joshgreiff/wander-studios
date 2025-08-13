@@ -3,29 +3,49 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
+type BookingData = {
+  classId: string;
+  email: string;
+  name: string;
+  phone?: string;
+  waiverName?: string;
+  waiverAgreed: boolean;
+};
+
+type PackageData = {
+  id: number;
+  package: {
+    id: number;
+    name: string;
+    price: number;
+    classCount: number;
+  };
+  expiresAt: string;
+  paid: boolean;
+};
+
 export default function ThankYouPage() {
-  const [bookingData, setBookingData] = useState<any>(null);
-  const [packageData, setPackageData] = useState<any>(null);
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [packageData, setPackageData] = useState<PackageData | null>(null);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
+  const type = searchParams?.get('type');
+  const classId = searchParams?.get('classId');
+  const packageBookingId = searchParams?.get('packageBookingId');
+  const email = searchParams?.get('email');
+  const name = searchParams?.get('name');
+  const phone = searchParams?.get('phone');
+  const waiverName = searchParams?.get('waiverName');
+  const waiverAgreed = searchParams?.get('waiverAgreed');
 
   useEffect(() => {
-    const type = searchParams.get('type');
     
     if (type === 'package') {
-      const packageBookingId = searchParams.get('packageBookingId');
       if (packageBookingId) {
         fetchPackageData(packageBookingId);
       }
     } else {
       // Handle individual class booking
-      const classId = searchParams.get('classId');
-      const email = searchParams.get('email');
-      const name = searchParams.get('name');
-      const phone = searchParams.get('phone');
-      const waiverName = searchParams.get('waiverName');
-      const waiverAgreed = searchParams.get('waiverAgreed');
-
       if (classId && email && name) {
         setBookingData({
           classId,
@@ -147,20 +167,20 @@ export default function ThankYouPage() {
               )}
 
               <div className="bg-orange-50 rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold text-orange-800 mb-4">What's Next?</h2>
+                <h2 className="text-xl font-semibold text-orange-800 mb-4">What&apos;s Next?</h2>
                 <div className="space-y-3 text-left">
                   <div className="flex items-start space-x-3">
                     <div className="text-orange-600 text-xl">📧</div>
                     <div>
                       <p className="font-medium text-orange-900">Confirmation Email</p>
-                      <p className="text-sm text-orange-600">You'll receive a confirmation email shortly</p>
+                      <p className="text-sm text-orange-600">You&apos;ll receive a confirmation email shortly</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="text-orange-600 text-xl">📅</div>
                     <div>
                       <p className="font-medium text-orange-900">Class Reminder</p>
-                      <p className="text-sm text-orange-600">We'll send you a reminder before your class</p>
+                      <p className="text-sm text-orange-600">We&apos;ll send you a reminder before your class</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">

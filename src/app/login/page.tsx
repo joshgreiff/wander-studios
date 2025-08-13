@@ -125,14 +125,14 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-orange-600">
-              Don't have an account?{' '}
-              <Link href="/register" className="font-medium text-orange-500 hover:text-orange-400">
-                Create one here
+            <p className="text-sm text-orange-600 mt-4">
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-orange-800 hover:text-orange-900 underline">
+                Register here
               </Link>
             </p>
             <p className="text-xs text-orange-500 mt-2">
-              Existing clients: Use your email and default password "Welcome2025!"
+              Existing clients: Use your email and default password &quot;Welcome2025!&quot;
             </p>
           </div>
         </form>

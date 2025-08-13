@@ -2,8 +2,15 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
+type User = {
+  id: number;
+  email: string;
+  name: string;
+  isAdmin?: boolean;
+};
+
 export default function Navigation() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Check for user on initial load
