@@ -1,243 +1,480 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+'use client';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getCurrentIndividualClassPrice, getPackagePrice, calculatePackageSavings, getPackageSavingsPercentage, formatPrice } from '@/utils/pricing';
+import Link from 'next/link';
+
+type User = {
+  id: number;
+  email: string;
+  name: string;
+};
 
 type Class = {
   id: number;
   date: string;
   time: string;
   description: string;
-  address?: string;
   capacity: number;
-  bookings?: Array<{ id: number }>;
+  address?: string;
+  isVirtual: boolean;
+  virtualLink?: string;
+  minAttendance: number;
+};
+
+type AvailablePackage = {
+  id: number;
+  classesRemaining: number;
+  expiresAt: string;
+  package: {
+    id: number;
+    name: string;
+    description: string;
+    classCount: number;
+    price: number;
+  };
 };
 
 export default function BookClassPage() {
   const params = useParams();
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const router = useRouter();
-  const [classData, setClassData] = useState<Class | null>(null);
+  const [classItem, setClassItem] = useState<Class | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [availablePackages, setAvailablePackages] = useState<AvailablePackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', waiver: false, signature: '' });
-  const [paying, setPaying] = useState<'square' | 'bitcoin' | null>(null);
+  const [booking, setBooking] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    waiverName: '',
+    waiverAgreed: false
+  });
+
+  const individualPrice = getCurrentIndividualClassPrice();
+  const packagePrice = getPackagePrice();
+  const savings = calculatePackageSavings();
+  const savingsPercentage = getPackageSavingsPercentage();
 
   useEffect(() => {
-    fetch(`/api/classes/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setClassData(data);
-        setLoading(false);
-      });
-  }, [id]);
-
-  // Calculate available spots
-  const currentBookings = classData?.bookings?.length || 0;
-  const availableSpots = classData ? classData.capacity - currentBookings : 0;
-  const isFull = availableSpots <= 0;
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value, type, checked } = e.target;
-    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-  }
-
-  // Function to format date and time
-  function formatDateTime(dateString: string, timeString: string) {
-    // Handle both ISO date strings and simple date strings
-    let date: Date;
-    if (dateString.includes('T')) {
-      // ISO date string from database (e.g., "2025-08-09T00:00:00.000Z")
-      // Extract just the date part to avoid timezone issues
-      const dateOnly = dateString.split('T')[0];
-      const [year, month, day] = dateOnly.split('-').map(Number);
-      date = new Date(year, month - 1, day); // month is 0-indexed
-    } else {
-      // Simple date string (e.g., "2025-08-09")
-      const [year, month, day] = dateString.split('-').map(Number);
-      date = new Date(year, month - 1, day); // month is 0-indexed
+    if (params.id) {
+      fetchClass(Number(params.id));
+      checkUserLogin();
     }
-    
-    // Format date like "Saturday, August 9th" - use local timezone
-    const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
-    };
-    
-    // Add ordinal suffix to day
-    const displayDay = date.getDate();
-    const suffix = getOrdinalSuffix(displayDay);
-    
-    const formattedDate = date.toLocaleDateString('en-US', dateOptions).replace(/\d+$/, displayDay + suffix);
-    
-    // Format time like "10:00am EST"
-    const timeOptions: Intl.DateTimeFormatOptions = {
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZone: 'America/New_York',
-      timeZoneName: 'short'
-    };
-    
-    const time = new Date(`1970-01-01T${timeString}`);
-    const formattedTime = time.toLocaleTimeString('en-US', timeOptions);
-    
-    return `${formattedDate} at ${formattedTime}`;
-  }
+  }, [params.id]);
 
-  // Function to get ordinal suffix (1st, 2nd, 3rd, etc.)
-  function getOrdinalSuffix(day: number) {
-    if (day > 3 && day < 21) return 'th';
-    switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+  const checkUserLogin = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const userObj = JSON.parse(userData);
+      setUser(userObj);
+      fetchAvailablePackages(userObj.id);
     }
-  }
+  };
 
-  async function handlePayment(method: 'square' | 'bitcoin') {
-    setPaying(method);
-    const api = method === 'square' ? '/api/square-checkout' : '/api/bitcoin-invoice';
-    const body = {
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      classId: classData?.id,
-      waiverName: form.signature,
-      waiverAgreed: form.waiver,
-    };
+  const fetchClass = async (classId: number) => {
     try {
-      console.log(`Making ${method} payment request:`, body);
-      
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      
-      console.log(`${method} payment response status:`, res.status);
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error(`${method} payment error response:`, errorData);
-        
-        if (errorData.error === 'Class is full') {
-          alert(`Sorry, this class is now full. Please try another class.`);
-        } else if (errorData.error === 'You are already booked for this class') {
-          alert('You are already booked for this class.');
-        } else {
-          alert(`Payment error: ${res.status} - ${errorData.error || 'Unknown error'}`);
-        }
-        return;
-      }
-      
-      const data = await res.json();
-      console.log(`${method} payment success:`, data);
-      
-      if (data.url) {
-        window.location.href = data.url;
+      const response = await fetch(`/api/classes/${classId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setClassItem(data);
       } else {
-        alert(data.error || 'Payment error - no URL returned');
+        router.push('/classes');
       }
     } catch (error) {
-      console.error(`${method} payment fetch error:`, error);
-      alert(`Payment error: ${error instanceof Error ? error.message : 'Network error'}`);
+      console.error('Error fetching class:', error);
+      router.push('/classes');
     } finally {
-      setPaying(null);
+      setLoading(false);
     }
+  };
+
+  const fetchAvailablePackages = async (userId: number) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/available-packages`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailablePackages(data);
+      }
+    } catch (error) {
+      console.error('Error fetching available packages:', error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBooking(true);
+
+    try {
+      let response;
+      
+      if (selectedPackageId && user) {
+        // Use package redemption
+        response = await fetch('/api/packages/redeem', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            packageBookingId: selectedPackageId,
+            classId: classItem?.id,
+            userId: user.id,
+            customerName: form.name || user.name,
+            customerEmail: form.email || user.email,
+            phone: form.phone,
+            waiverName: form.waiverName || user.name,
+            waiverAgreed: form.waiverAgreed
+          }),
+        });
+      } else {
+        // Regular booking
+        response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            classId: classItem?.id,
+            ...form
+          }),
+        });
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          // Package redemption was successful, redirect to thank you
+          router.push(`/thank-you?type=package-redemption&classId=${classItem?.id}&packageBookingId=${selectedPackageId}`);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to book class');
+      }
+    } catch (error) {
+      console.error('Error booking class:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setBooking(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-orange-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!classItem) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-orange-600">Class not found</div>
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-      <section className="max-w-xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
-        <button onClick={() => router.back()} className="mb-4 text-orange-700 hover:underline">&larr; Back to Classes</button>
-        {loading ? (
-          <div className="text-orange-700">Loading...</div>
-        ) : !classData ? (
-          <div className="text-orange-700">Class not found.</div>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold mb-2 text-orange-900 text-center">Book: {classData.description}</h1>
-            <div className="mb-4 text-orange-800 text-center">
-              <div className="font-semibold text-lg">{formatDateTime(classData.date, classData.time)}</div>
-              {classData.address && (
-                <div className="text-sm text-orange-700 mt-1">📍 {classData.address}</div>
-              )}
-              <div className="text-sm">
-                {isFull ? (
-                  <span className="text-red-600 font-semibold">Class Full ({classData.capacity}/{classData.capacity})</span>
-                ) : (
-                  <span>Available Spots: {availableSpots}/{classData.capacity}</span>
+    <div className="min-h-screen bg-orange-50">
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold text-orange-900">Book Your Class</h1>
+              <p className="text-orange-600">Complete your booking below</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-orange-600">{formatPrice(individualPrice)}</p>
+              <p className="text-sm text-orange-500">per class</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Class Details */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-semibold text-orange-800 mb-4">Class Details</h2>
+              <div className="space-y-3">
+                <div>
+                  <h3 className="font-semibold text-orange-900">{classItem.description}</h3>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-orange-600">📅</span>
+                  <span>{formatDate(classItem.date)}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-orange-600">⏰</span>
+                  <span>{classItem.time}</span>
+                </div>
+                {classItem.address && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-orange-600">📍</span>
+                    <span>{classItem.address}</span>
+                  </div>
+                )}
+                {classItem.isVirtual && classItem.virtualLink && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-orange-600">🔗</span>
+                    <span className="text-blue-600">
+                      <a href={classItem.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
+                        Virtual Class Link
+                      </a>
+                    </span>
+                  </div>
+                )}
+                {classItem.minAttendance > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-orange-600">👥</span>
+                    <span>Minimum {classItem.minAttendance} people required</span>
+                  </div>
                 )}
               </div>
             </div>
-            
-            {isFull ? (
-              <div className="w-full max-w-md bg-red-50 border border-red-200 rounded p-4 text-center">
-                <p className="text-red-800 font-semibold">This class is currently full.</p>
-                <p className="text-red-700 text-sm mt-1">Please check back later or try another class.</p>
+
+            {/* Package Promotion */}
+            <div className="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg shadow-md p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-orange-900 mb-2">
+                    💰 Save Money with Class Packages!
+                  </h3>
+                  <p className="text-orange-700 mb-3">
+                    Get {formatPrice(packagePrice)} for 4 classes instead of {formatPrice(individualPrice * 4)} 
+                    <br />
+                    <span className="font-semibold text-green-600">
+                      Save {formatPrice(savings)} ({savingsPercentage}% off!)
+                    </span>
+                    <br />
+                    <span className="font-semibold text-blue-600">
+                      Lock in the $10/class rate before prices increase!
+                    </span>
+                  </p>
+                  <Link
+                    href="/packages"
+                    className="inline-block bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                  >
+                    View Packages
+                  </Link>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-orange-600">{formatPrice(packagePrice)}</div>
+                  <div className="text-sm text-orange-600">for 4 classes</div>
+                  <div className="text-xs text-green-600 font-semibold">{savingsPercentage}% savings</div>
+                </div>
               </div>
-            ) : (
-            <form onSubmit={e => e.preventDefault()} className="w-full max-w-md flex flex-col gap-4 bg-white/90 rounded p-6 border shadow">
-                <>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
-                    <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
-                    <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
-                    <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="border rounded px-3 py-2 flex-1 min-w-0 max-w-xs bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
-                  </div>
-                  
-                  {/* Waiver Section */}
-                  <div className="bg-orange-50 rounded-lg p-4 mt-2">
-                    <h4 className="font-semibold text-orange-900 mb-2">Liability Waiver & Health Information</h4>
-                    <p className="text-sm text-orange-700 mb-3">
-                      <strong>First-time students:</strong> Please complete our full liability waiver and health form before your first class for your safety and our records.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                      <a 
-                        href="/waiver" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded text-center text-sm transition"
+            </div>
+
+            {/* Package Redemption Section */}
+            {user && availablePackages.length > 0 && (
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-6 mb-6">
+                <h2 className="text-xl font-semibold text-green-800 mb-4">Use Your Package</h2>
+                <p className="text-green-700 mb-4">
+                  You have available packages! Use one to book this class for free.
+                </p>
+                
+                <div className="space-y-3">
+                  {availablePackages.map((pkg) => (
+                    <div key={pkg.id} className="flex items-center justify-between p-3 border border-green-200 rounded-lg">
+                      <div>
+                        <h3 className="font-semibold text-green-900">{pkg.package.name}</h3>
+                        <p className="text-sm text-green-600">
+                          {pkg.classesRemaining} classes remaining • Expires {new Date(pkg.expiresAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPackageId(selectedPackageId === pkg.id ? null : pkg.id)}
+                        className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                          selectedPackageId === pkg.id
+                            ? 'bg-green-600 text-white'
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        }`}
                       >
-                        Complete Full Waiver
-                      </a>
-                      <span className="text-xs text-orange-600 text-center sm:self-center">
-                        (Opens in new tab)
-                      </span>
+                        {selectedPackageId === pkg.id ? 'Selected' : 'Use Package'}
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" name="waiver" checked={form.waiver} onChange={handleChange} required />
-                      <span className="text-orange-800 text-sm">
-                        I agree to the{' '}
-                        <a href="/waiver" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 underline">
-                          liability waiver terms
-                        </a>
-                      </span>
-                    </div>
+                  ))}
+                </div>
+                
+                {selectedPackageId && (
+                  <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                    <p className="text-green-800 text-sm">
+                      ✅ Package selected! This class will be booked using your package (no additional charge).
+                    </p>
                   </div>
-                  
-                  <input name="signature" value={form.signature} onChange={handleChange} placeholder="Type your name as signature" required className="border rounded px-3 py-2 mt-2 bg-white placeholder-gray-600 text-orange-900 focus:outline-orange-400" />
-                  <button
-                    type="button"
-                    className="bg-orange-600 text-white font-semibold py-3 rounded hover:bg-orange-700 mt-2 disabled:opacity-60"
-                    onClick={() => handlePayment('square')}
-                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver || isFull}
-                  >
-                    {paying === 'square' ? 'Processing...' : 'Pay with Card (Square) $10'}
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-yellow-500 text-white font-semibold py-3 rounded hover:bg-yellow-600 mt-2 disabled:opacity-60"
-                    onClick={() => handlePayment('bitcoin')}
-                    disabled={paying !== null || !form.name || !form.email || !form.signature || !form.waiver || isFull}
-                  >
-                    {paying === 'bitcoin' ? 'Processing...' : 'Pay with Bitcoin (Speed) $9.50'}
-                  </button>
-                </>
-            </form>
+                )}
+              </div>
             )}
-          </>
-        )}
-      </section>
-    </main>
+
+            {/* Booking Form */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold text-orange-800 mb-4">Book This Class</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-orange-700 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Your full name"
+                      required
+                      className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-orange-700 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="your@email.com"
+                      type="email"
+                      required
+                      className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-orange-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="(555) 123-4567"
+                    type="tel"
+                    className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-orange-700 mb-1">
+                    Waiver Name *
+                  </label>
+                  <input
+                    name="waiverName"
+                    value={form.waiverName}
+                    onChange={handleChange}
+                    placeholder="Name for liability waiver"
+                    required
+                    className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <input
+                    name="waiverAgreed"
+                    type="checkbox"
+                    checked={form.waiverAgreed}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 h-4 w-4 text-orange-600 focus:ring-orange-500 border-orange-300 rounded"
+                  />
+                  <label className="text-sm text-orange-700">
+                    I agree to the liability waiver and understand the risks associated with physical activity. *
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={booking}
+                  className={`w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 ${
+                    selectedPackageId 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'bg-orange-600 hover:bg-orange-700 text-white'
+                  }`}
+                >
+                  {booking ? 'Processing...' : 
+                    selectedPackageId 
+                      ? 'Book Class with Package (Free)' 
+                      : `Book Class for ${formatPrice(individualPrice)}`
+                  }
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Pricing Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
+              <h3 className="text-lg font-semibold text-orange-800 mb-4">Pricing Summary</h3>
+              
+              <div className="space-y-4">
+                {selectedPackageId && (
+                  <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-green-700 font-medium">Package Redemption</span>
+                      <span className="font-semibold text-green-900">FREE</span>
+                    </div>
+                    <p className="text-xs text-green-600">
+                      Using your available package
+                    </p>
+                  </div>
+                )}
+                
+                <div className="border-b border-orange-200 pb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-orange-700">Individual Class</span>
+                    <span className="font-semibold text-orange-900">{formatPrice(individualPrice)}</span>
+                  </div>
+                  <p className="text-xs text-orange-500 mt-1">
+                    {individualPrice === 10 ? 'Current price until August 31, 2025' : 'New price effective September 1, 2025'}
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-orange-700 font-medium">4-Class Package</span>
+                    <span className="font-semibold text-orange-900">{formatPrice(packagePrice)}</span>
+                  </div>
+                  <p className="text-xs text-green-600 font-semibold">
+                    Save {formatPrice(savings)} ({savingsPercentage}% off!)
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">
+                    Expires in 3 months
+                  </p>
+                </div>
+
+                <Link
+                  href="/packages"
+                  className="block w-full bg-orange-100 text-orange-800 text-center py-2 rounded hover:bg-orange-200 transition-colors text-sm font-medium"
+                >
+                  View Package Details →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 } 

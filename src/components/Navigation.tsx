@@ -3,109 +3,97 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 export default function Navigation() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    // Check if user is logged in as admin
-    if (typeof window !== 'undefined') {
-      const adminStatus = localStorage.getItem('isAdmin') === 'true';
-      setIsAdmin(adminStatus);
-
-      // Listen for admin login status changes
-      const handleAdminStatusChange = (event: CustomEvent) => {
-        setIsAdmin(event.detail.isAdmin);
-      };
-
-      window.addEventListener('adminLoginStatusChanged', handleAdminStatusChange as EventListener);
-
-      // Cleanup event listener
-      return () => {
-        window.removeEventListener('adminLoginStatusChanged', handleAdminStatusChange as EventListener);
-      };
+    // Check for user on initial load
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
+
+    // Listen for storage changes (when user logs in/out)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user') {
+        if (e.newValue) {
+          setUser(JSON.parse(e.newValue));
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    // Listen for custom events (for same-tab login/logout)
+    const handleUserChange = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('userLogin', handleUserChange);
+    window.addEventListener('userLogout', handleUserChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userLogin', handleUserChange);
+      window.removeEventListener('userLogout', handleUserChange);
+    };
   }, []);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    // Dispatch custom event for same-tab logout
+    window.dispatchEvent(new Event('userLogout'));
+    window.location.href = '/';
   };
 
   return (
-    <header className="w-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-400 shadow-md relative">
-      <nav className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
-        <Link href="/" className="text-2xl font-bold text-white tracking-tight">Wander Movement</Link>
-        
-        {/* Desktop Navigation - Show on medium screens and larger */}
-        <ul className="hidden md:flex gap-4 text-white font-semibold text-lg">
-          <li><Link href="/" className="hover:underline">Home</Link></li>
-          <li><Link href="/book" className="hover:underline">Book</Link></li>
-          <li><Link href="/waiver" className="hover:underline">Waiver</Link></li>
-          <li><Link href="/about" className="hover:underline">About</Link></li>
-          <li><Link href="/contact" className="hover:underline">Contact</Link></li>
-          {isAdmin && (
-            <li>
-              <Link 
-                href="/admin" 
-                className="hover:underline bg-white/20 px-2 py-1 rounded text-sm"
-                title="Admin Dashboard"
-              >
-                Admin
-              </Link>
-            </li>
-          )}
-        </ul>
-
-        {/* Mobile Hamburger Button - Only show on small screens */}
-        <button
-          onClick={toggleMobileMenu}
-          className="md:hidden flex justify-center items-center w-8 h-8 text-white hamburger-button"
-          aria-label="Toggle mobile menu"
-        >
-          {isMobileMenuOpen ? (
-            // X icon
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          ) : (
-            // Hamburger icon
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          )}
-        </button>
-      </nav>
-
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-orange-500 shadow-lg z-50">
-          <ul className="text-white font-semibold text-lg px-4 pb-4 space-y-2">
-            <li><Link href="/" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Home</Link></li>
-            <li><Link href="/book" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Book</Link></li>
-            <li><Link href="/waiver" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Waiver</Link></li>
-            <li><Link href="/about" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">About</Link></li>
-            <li><Link href="/contact" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Contact</Link></li>
-            {isAdmin && (
-              <li>
-                <Link 
-                  href="/admin" 
-                  onClick={closeMobileMenu}
-                  className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
-                  title="Admin Dashboard"
-                >
-                  Admin
+    <nav className="bg-orange-600 text-white shadow-lg">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          <Link href="/" className="text-xl font-bold hover:text-orange-200 transition-colors">
+            Wander Studios
+          </Link>
+          
+          <div className="flex items-center space-x-6">
+            <Link href="/classes" className="hover:text-orange-200 transition-colors">
+              Classes
+            </Link>
+            <Link href="/about" className="hover:text-orange-200 transition-colors">
+              About
+            </Link>
+            <Link href="/contact" className="hover:text-orange-200 transition-colors">
+              Contact
+            </Link>
+            
+            {user ? (
+              <>
+                <Link href="/packages" className="hover:text-orange-200 transition-colors">
+                  Packages
                 </Link>
-              </li>
+                <Link href="/dashboard" className="hover:text-orange-200 transition-colors">
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="hover:text-orange-200 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className="hover:text-orange-200 transition-colors">
+                Login
+              </Link>
             )}
-          </ul>
+          </div>
         </div>
-      )}
-    </header>
+      </div>
+    </nav>
   );
 } 

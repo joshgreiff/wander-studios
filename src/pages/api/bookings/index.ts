@@ -50,6 +50,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'You are already booked for this class' });
       }
 
+      // Find existing user by email (for auto-linking)
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() }
+      });
+
       // Create the booking
       const booking = await prisma.booking.create({
         data: {
@@ -59,7 +64,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           phone: phone || null,
           waiverName,
           waiverAgreed,
-          paid: true // Since they've already paid
+          paid: true, // Since they've already paid
+          userId: existingUser?.id || null // Auto-link to existing user if found
         }
       });
 
@@ -69,7 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           currentBookings: currentBookings + 1,
           capacity: classItem.capacity,
           availableSpots: classItem.capacity - (currentBookings + 1)
-        }
+        },
+        userLinked: !!existingUser // Indicate if booking was linked to existing user
       });
 
     } catch (error) {

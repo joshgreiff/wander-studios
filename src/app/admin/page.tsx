@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
 type Class = {
   id: number;
@@ -74,6 +75,7 @@ export default function AdminPage() {
   const [csvFiles, setCsvFiles] = useState<File[]>([]);
   const [importMethod, setImportMethod] = useState<'text' | 'csv'>('text');
   const [previewBookings, setPreviewBookings] = useState<Array<{ name: string; email?: string; phone?: string }>>([]);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
 
   useEffect(() => {
     // Auto-authenticate if localStorage says so
@@ -88,6 +90,7 @@ export default function AdminPage() {
       fetchWaivers();
       fetchBookings();
       fetchSquareRevenue();
+      generateQRCode();
     }
   }, [authenticated]);
 
@@ -530,6 +533,34 @@ export default function AdminPage() {
     }
   }
 
+  // Generate QR Code
+  const generateQRCode = async () => {
+    try {
+      const websiteUrl = window.location.origin + '/book';
+      const qrDataUrl = await QRCode.toDataURL(websiteUrl, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      setQrCodeUrl(qrDataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
+
+  // Download QR Code
+  const downloadQRCode = () => {
+    if (qrCodeUrl) {
+      const link = document.createElement('a');
+      link.download = 'wander-studios-qr.png';
+      link.href = qrCodeUrl;
+      link.click();
+    }
+  };
+
   if (!authenticated) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
@@ -573,6 +604,28 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold mb-4 text-orange-900">Admin Dashboard</h1>
         <button onClick={handleLogout} className="mb-4 self-end text-orange-700 hover:underline">Log out</button>
         
+        {/* QR Code Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold text-orange-800 mb-4">QR Code for Flyers</h2>
+          <div className="flex items-center space-x-4">
+            {qrCodeUrl && (
+              <div className="text-center">
+                <img src={qrCodeUrl} alt="QR Code" className="border-2 border-orange-200 rounded-lg" />
+                <button
+                  onClick={downloadQRCode}
+                  className="mt-2 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                >
+                  Download QR Code
+                </button>
+              </div>
+            )}
+            <div className="text-sm text-gray-600">
+              <p><strong>Website URL:</strong> {typeof window !== 'undefined' ? window.location.origin + '/book' : ''}</p>
+              <p className="mt-2">This QR code links directly to the class booking page. Perfect for flyers, business cards, and marketing materials.</p>
+            </div>
+          </div>
+        </div>
+
         {/* Tab Navigation */}
         <div className="flex gap-4 mb-6 w-full">
           <button

@@ -1,204 +1,208 @@
 'use client';
-
-import { useEffect, useState, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-function ThankYouContent() {
+export default function ThankYouPage() {
+  const [bookingData, setBookingData] = useState<any>(null);
+  const [packageData, setPackageData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
-  const [bookingStatus, setBookingStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // Get booking data from URL parameters
-    if (!searchParams) return;
-    
     const type = searchParams.get('type');
     
     if (type === 'package') {
-      // Handle package purchase
-      const customerName = searchParams.get('customerName');
-      const customerEmail = searchParams.get('customerEmail');
-      const packageId = searchParams.get('packageId');
-      const waiverName = searchParams.get('waiverName');
-      const waiverAgreed = searchParams.get('waiverAgreed');
-      const customerPhone = searchParams.get('customerPhone');
-
-      if (customerName && customerEmail && packageId && waiverName && waiverAgreed) {
-        createPackageBooking({
-          customerName,
-          customerEmail,
-          packageId,
-          waiverName,
-          waiverAgreed: waiverAgreed === 'true',
-          customerPhone: customerPhone || undefined
-        });
-      } else {
-        setBookingStatus('success');
+      const packageBookingId = searchParams.get('packageBookingId');
+      if (packageBookingId) {
+        fetchPackageData(packageBookingId);
       }
     } else {
       // Handle individual class booking
-      const name = searchParams.get('name');
-      const email = searchParams.get('email');
       const classId = searchParams.get('classId');
+      const email = searchParams.get('email');
+      const name = searchParams.get('name');
+      const phone = searchParams.get('phone');
       const waiverName = searchParams.get('waiverName');
       const waiverAgreed = searchParams.get('waiverAgreed');
-      const phone = searchParams.get('phone');
 
-      // If we have the required parameters, create the booking
-      if (name && email && classId && waiverName && waiverAgreed) {
-        createBooking({
-          name,
-          email,
+      if (classId && email && name) {
+        setBookingData({
           classId,
+          email,
+          name,
+          phone,
           waiverName,
-          waiverAgreed: waiverAgreed === 'true',
-          phone: phone || undefined
+          waiverAgreed: waiverAgreed === 'true'
         });
-      } else {
-        // No booking data, just show success message
-        setBookingStatus('success');
       }
     }
+    setLoading(false);
   }, [searchParams]);
 
-  async function createBooking(bookingData: {
-    name: string;
-    email: string;
-    classId: string;
-    waiverName: string;
-    waiverAgreed: boolean;
-    phone?: string;
-  }) {
+  const fetchPackageData = async (packageBookingId: string) => {
     try {
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create booking');
+      const response = await fetch(`/api/packages/${packageBookingId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPackageData(data);
       }
-
-      setBookingStatus('success');
     } catch (error) {
-      console.error('Error creating booking:', error);
-      setBookingStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
+      console.error('Error fetching package data:', error);
     }
-  }
+  };
 
-  async function createPackageBooking(bookingData: {
-    customerName: string;
-    customerEmail: string;
-    packageId: string;
-    waiverName: string;
-    waiverAgreed: boolean;
-    customerPhone?: string;
-  }) {
-    try {
-      const response = await fetch('/api/packages/book', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...bookingData,
-          action: 'purchase'
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create package booking');
-      }
-
-      // Mark all package bookings as paid
-      const packageBookings = await response.json();
-      await Promise.all(
-        packageBookings.packageBookings.map((booking: { id: number }) =>
-          fetch('/api/packages/book', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              packageId: bookingData.packageId,
-              customerName: bookingData.customerName,
-              customerEmail: bookingData.customerEmail,
-              customerPhone: bookingData.customerPhone,
-              waiverName: bookingData.waiverName,
-              waiverAgreed: bookingData.waiverAgreed,
-              action: 'mark-paid',
-              bookingId: booking.id
-            }),
-          })
-        )
-      );
-
-      setBookingStatus('success');
-    } catch (error) {
-      console.error('Error creating package booking:', error);
-      setBookingStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-orange-600">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-      <section className="max-w-2xl w-full bg-white/80 rounded-xl shadow-lg p-8 mt-8 text-center">
-        {bookingStatus === 'loading' && (
-          <>
-            <h2 className="text-3xl font-bold mb-4 text-orange-900">Processing Your Booking...</h2>
-            <p className="mb-4 text-orange-800">Please wait while we confirm your spot.</p>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
-          </>
-        )}
-
-        {bookingStatus === 'success' && (
-          <>
-            <h2 className="text-3xl font-bold mb-4 text-orange-900">Thank You for Booking!</h2>
-            <p className="mb-4 text-orange-800">Your spot is confirmed. We can&apos;t wait to move with you!</p>
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-orange-900 mb-2">What to Bring</h3>
-              <ul className="list-disc list-inside text-orange-800 text-left inline-block">
-                <li>Comfortable clothes</li>
-                <li>Yoga mat (if you have one)</li>
-                <li>Water bottle</li>
-                <li>Open mind and positive energy!</li>
-              </ul>
+    <div className="min-h-screen bg-orange-50">
+      <div className="max-w-2xl mx-auto py-12 px-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          {/* Success Icon */}
+          <div className="mb-6">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-            <p className="text-orange-700 text-sm">Check your email for confirmation and further details.</p>
-          </>
-        )}
+          </div>
 
-        {bookingStatus === 'error' && (
-          <>
-            <h2 className="text-3xl font-bold mb-4 text-red-900">Booking Error</h2>
-            <p className="mb-4 text-red-800">There was an issue confirming your booking.</p>
-            <p className="mb-4 text-red-700 text-sm">{errorMessage}</p>
-            <p className="text-red-700 text-sm">Please contact us if you believe this is an error.</p>
-          </>
-        )}
-      </section>
-    </main>
-  );
-}
+          {/* Package Purchase Success */}
+          {packageData && (
+            <>
+              <h1 className="text-3xl font-bold text-orange-900 mb-4">
+                Package Purchase Successful!
+              </h1>
+              <p className="text-lg text-orange-700 mb-6">
+                Thank you for purchasing the {packageData.package.name}!
+              </p>
+              
+              <div className="bg-orange-50 rounded-lg p-6 mb-6 text-left">
+                <h2 className="text-xl font-semibold text-orange-800 mb-4">Package Details</h2>
+                <div className="space-y-2">
+                  <p><strong>Package:</strong> {packageData.package.name}</p>
+                  <p><strong>Price:</strong> ${packageData.package.price}</p>
+                  <p><strong>Classes Included:</strong> {packageData.package.classCount}</p>
+                  <p><strong>Expires:</strong> {new Date(packageData.expiresAt).toLocaleDateString()}</p>
+                  <p><strong>Status:</strong> 
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                      packageData.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {packageData.paid ? 'Paid' : 'Payment Pending'}
+                    </span>
+                  </p>
+                </div>
+              </div>
 
-export default function ThankYou() {
-  return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-        <section className="max-w-2xl w-full bg-white/80 rounded-xl shadow-lg p-8 mt-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-orange-900">Loading...</h2>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
-        </section>
-      </main>
-    }>
-      <ThankYouContent />
-    </Suspense>
+              <div className="space-y-4">
+                <p className="text-orange-600">
+                  You can now use your package to book classes. Each class will be deducted from your package.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link
+                    href="/classes"
+                    className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    Browse Classes
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
+                  >
+                    View Dashboard
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Individual Class Booking Success */}
+          {bookingData && (
+            <>
+              <h1 className="text-3xl font-bold text-orange-900 mb-4">
+                Booking Confirmed!
+              </h1>
+              <p className="text-lg text-orange-700 mb-6">
+                Thank you for booking your class, {bookingData.name}!
+              </p>
+
+              {/* Booking Linked Notification */}
+              {typeof window !== 'undefined' && localStorage.getItem('bookingLinkedToUser') === 'true' && (
+                <div className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                  <p className="text-green-800 text-sm">
+                    ✅ Your booking has been linked to your existing account. 
+                    <br />
+                    <a href="/dashboard" className="text-green-600 hover:text-green-800 underline">
+                      View your bookings →
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-orange-50 rounded-lg p-6 mb-6">
+                <h2 className="text-xl font-semibold text-orange-800 mb-4">What's Next?</h2>
+                <div className="space-y-3 text-left">
+                  <div className="flex items-start space-x-3">
+                    <div className="text-orange-600 text-xl">📧</div>
+                    <div>
+                      <p className="font-medium text-orange-900">Confirmation Email</p>
+                      <p className="text-sm text-orange-600">You'll receive a confirmation email shortly</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="text-orange-600 text-xl">📅</div>
+                    <div>
+                      <p className="font-medium text-orange-900">Class Reminder</p>
+                      <p className="text-sm text-orange-600">We'll send you a reminder before your class</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="text-orange-600 text-xl">🎯</div>
+                    <div>
+                      <p className="font-medium text-orange-900">Save Money</p>
+                      <p className="text-sm text-orange-600">
+                        Consider buying a class package for better value!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/dashboard"
+                  className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  View Dashboard
+                </Link>
+                <Link
+                  href="/packages"
+                  className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
+                >
+                  Buy Class Package
+                </Link>
+              </div>
+            </>
+          )}
+
+          {/* Contact Information */}
+          <div className="mt-8 pt-6 border-t border-orange-200">
+            <p className="text-sm text-orange-600">
+              Questions? Contact us at{' '}
+              <a href="mailto:ltwander@gmail.com" className="text-orange-800 hover:text-orange-900 underline">
+                ltwander@gmail.com
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 } 

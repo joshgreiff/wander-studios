@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  name        String
+  phone       String?
+  password    String    // Hashed password
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relationships
+  bookings    Booking[]
+  packageBookings PackageBooking[]
+}
+
 model Class {
   id              Int              @id @default(autoincrement())
   date            DateTime
@@ -16,8 +31,11 @@ model Class {
   createdAt       DateTime         @default(now())
   address         String?
   archived        Boolean          @default(false)
+  isVirtual       Boolean          @default(false)
+  virtualLink     String?
+  minAttendance   Int              @default(1)
   bookings        Booking[]
-  packageBookings PackageBooking[]
+  packageRedemptions PackageRedemption[]
 }
 
 model Booking {
@@ -31,18 +49,24 @@ model Booking {
   paid         Boolean  @default(false)
   createdAt    DateTime @default(now())
   waiverId     Int?
+  
+  // Link to user account (optional)
+  userId       Int?
+  user         User?    @relation(fields: [userId], references: [id])
+  
   class        Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   waiver       Waiver?  @relation(fields: [waiverId], references: [id])
 }
 
 model ClassPackage {
   id              Int              @id @default(autoincrement())
-  name            String
-  description     String
-  classCount      Int
-  price           Float
-  discount        Float?
+  name            String           // e.g., "4-Class Package"
+  description     String           // e.g., "Perfect for regular attendees"
+  classCount      Int              // Number of classes included (4)
+  price           Float            // Price in USD ($40)
+  discount        Float?           // Optional discount percentage
   isActive        Boolean          @default(true)
+  expiresInDays   Int              @default(90) // 3 months = 90 days
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   packageBookings PackageBooking[]
@@ -51,20 +75,40 @@ model ClassPackage {
 model PackageBooking {
   id            Int          @id @default(autoincrement())
   packageId     Int
-  classId       Int
   customerName  String
   customerEmail String
   customerPhone String?
   waiverName    String
   waiverAgreed  Boolean
   paid          Boolean      @default(false)
-  redeemed      Boolean      @default(false)
-  redeemedAt    DateTime?
+  classesUsed   Int          @default(0) // Number of classes used from this package
+  classesRemaining Int       // Number of classes left in package
+  expiresAt     DateTime     // When the package expires
   createdAt     DateTime     @default(now())
   waiverId      Int?
-  class         Class        @relation(fields: [classId], references: [id])
+  
+  // Link to user account (required for packages)
+  userId        Int
+  user          User         @relation(fields: [userId], references: [id])
+  
   package       ClassPackage @relation(fields: [packageId], references: [id])
   waiver        Waiver?      @relation(fields: [waiverId], references: [id])
+  
+  // Individual class redemptions from this package
+  packageRedemptions PackageRedemption[]
+}
+
+model PackageRedemption {
+  id              Int           @id @default(autoincrement())
+  packageBookingId Int
+  classId         Int
+  redeemedAt      DateTime      @default(now())
+  
+  // Link to the package booking
+  packageBooking  PackageBooking @relation(fields: [packageBookingId], references: [id], onDelete: Cascade)
+  
+  // Link to the class that was redeemed
+  class           Class         @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model Waiver {
