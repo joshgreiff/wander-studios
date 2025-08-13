@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCurrentIndividualClassPrice, getPackagePrice, calculatePackageSavings, getPackageSavingsPercentage, formatPrice } from '@/utils/pricing';
+import { getCurrentIndividualClassPrice, getPackagePrice, calculatePackageSavings, getPackageSavingsPercentage, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
 import Link from 'next/link';
 
 type User = {
@@ -49,7 +49,8 @@ export default function BookClassPage() {
     email: '',
     phone: '',
     waiverName: '',
-    waiverAgreed: false
+    waiverAgreed: false,
+    paymentMethod: 'square'
   });
 
   const individualPrice = getCurrentIndividualClassPrice();
@@ -58,11 +59,11 @@ export default function BookClassPage() {
   const savingsPercentage = getPackageSavingsPercentage();
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       fetchClass(Number(params.id));
       checkUserLogin();
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   const checkUserLogin = () => {
     const userData = localStorage.getItem('user');
@@ -110,14 +111,21 @@ export default function BookClassPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedPackageId && user) {
+      handlePaymentClick('package');
+    }
+  };
+
+  const handlePaymentClick = async (paymentMethod: 'square' | 'bitcoin' | 'package') => {
+    setForm(prev => ({ ...prev, paymentMethod }));
     setBooking(true);
 
     try {
       let response;
       
-      if (selectedPackageId && user) {
+      if (paymentMethod === 'package' && selectedPackageId && user) {
         // Use package redemption
         response = await fetch('/api/packages/redeem', {
           method: 'POST',
@@ -136,15 +144,18 @@ export default function BookClassPage() {
           }),
         });
       } else {
-        // Regular booking
-        response = await fetch('/api/bookings', {
+        // Regular booking - determine payment method
+        const endpoint = paymentMethod === 'bitcoin' ? '/api/bitcoin-invoice' : '/api/bookings';
+        
+        response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             classId: classItem?.id,
-            ...form
+            ...form,
+            paymentMethod
           }),
         });
       }
@@ -170,12 +181,24 @@ export default function BookClassPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Create a date object and format it in the local timezone
+    const date = new Date(dateString);
+    // Use toLocaleDateString without explicit timezone to use local timezone
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const formatTime = (timeString: string) => {
+    // Convert 24-hour format to 12-hour format with AM/PM
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   if (loading) {
@@ -226,7 +249,7 @@ export default function BookClassPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-orange-600">⏰</span>
-                  <span>{classItem.time}</span>
+                  <span>{formatTime(classItem.time)}</span>
                 </div>
                 {classItem.address && (
                   <div className="flex items-center space-x-2">
@@ -253,22 +276,42 @@ export default function BookClassPage() {
               </div>
             </div>
 
+            {/* Waiver Reminder */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <div className="text-blue-500 text-xl">📋</div>
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-1">Waiver Required</h3>
+                  <p className="text-blue-700 text-sm mb-2">
+                    All participants must complete our liability waiver before attending class.
+                  </p>
+                  <Link
+                    href="/waiver"
+                    target="_blank"
+                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                  >
+                    Complete Waiver Form →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             {/* Package Promotion */}
-            <div className="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg shadow-md p-6 mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-orange-200">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-orange-900 mb-2">
-                    💰 Save Money with Class Packages!
+                    💰 Lock in Current Pricing with Class Packages!
                   </h3>
                   <p className="text-orange-700 mb-3">
-                    Get {formatPrice(packagePrice)} for 4 classes instead of {formatPrice(individualPrice * 4)} 
-                    <br />
-                    <span className="font-semibold text-green-600">
-                      Save {formatPrice(savings)} ({savingsPercentage}% off!)
-                    </span>
+                    Get {formatPrice(packagePrice)} for 4 classes 
                     <br />
                     <span className="font-semibold text-blue-600">
-                      Lock in the $10/class rate before prices increase!
+                      Currently: {formatPrice(individualPrice)}/class • After Aug 31: {formatPrice(PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31)}/class
+                    </span>
+                    <br />
+                    <span className="font-semibold text-green-600">
+                      Lock in the {formatPrice(individualPrice)}/class rate before prices increase!
                     </span>
                   </p>
                   <Link
@@ -281,7 +324,7 @@ export default function BookClassPage() {
                 <div className="text-right">
                   <div className="text-3xl font-bold text-orange-600">{formatPrice(packagePrice)}</div>
                   <div className="text-sm text-orange-600">for 4 classes</div>
-                  <div className="text-xs text-green-600 font-semibold">{savingsPercentage}% savings</div>
+                  <div className="text-xs text-blue-600 font-semibold">Lock in current rate</div>
                 </div>
               </div>
             </div>
@@ -331,7 +374,7 @@ export default function BookClassPage() {
             {/* Booking Form */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold text-orange-800 mb-4">Book This Class</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleFormSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-orange-700 mb-1">
@@ -404,21 +447,52 @@ export default function BookClassPage() {
                   </label>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={booking}
-                  className={`w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 ${
-                    selectedPackageId 
-                      ? 'bg-green-600 hover:bg-green-700 text-white' 
-                      : 'bg-orange-600 hover:bg-orange-700 text-white'
-                  }`}
-                >
-                  {booking ? 'Processing...' : 
-                    selectedPackageId 
-                      ? 'Book Class with Package (Free)' 
-                      : `Book Class for ${formatPrice(individualPrice)}`
-                  }
-                </button>
+                {/* Submit Button for Package Redemption */}
+                {selectedPackageId && (
+                  <button
+                    type="button"
+                    onClick={() => handlePaymentClick('package')}
+                    disabled={booking}
+                    className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {booking ? 'Processing...' : 'Book Class with Package (Free)'}
+                  </button>
+                )}
+
+                {/* Payment Options */}
+                {!selectedPackageId && (
+                  <div className="mt-6 space-y-3">
+                    <div className="text-center text-sm text-gray-600 mb-4">
+                      Choose your payment method:
+                    </div>
+                    
+                    {/* Credit Card Payment */}
+                    <button
+                      type="button"
+                      onClick={() => handlePaymentClick('square')}
+                      disabled={booking}
+                      className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center space-x-2"
+                    >
+                      <span>💳</span>
+                      <span>Pay with Credit Card - {formatPrice(individualPrice)}</span>
+                    </button>
+
+                    {/* Bitcoin Payment */}
+                    <button
+                      type="button"
+                      onClick={() => handlePaymentClick('bitcoin')}
+                      disabled={booking}
+                      className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-yellow-600 hover:bg-yellow-700 text-white flex items-center justify-center space-x-2"
+                    >
+                      <span>₿</span>
+                      <span>Pay with Bitcoin - {formatPrice(individualPrice * 0.95)} (5% off!)</span>
+                    </button>
+
+                    <div className="text-center text-xs text-gray-500 mt-2">
+                      Bitcoin payments receive a 5% discount
+                    </div>
+                  </div>
+                )}
               </form>
             </div>
           </div>
@@ -451,22 +525,25 @@ export default function BookClassPage() {
                   </p>
                 </div>
 
-                <div className="bg-orange-50 rounded-lg p-4">
+                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-orange-700 font-medium">4-Class Package</span>
                     <span className="font-semibold text-orange-900">{formatPrice(packagePrice)}</span>
                   </div>
-                  <p className="text-xs text-green-600 font-semibold">
-                    Save {formatPrice(savings)} ({savingsPercentage}% off!)
+                  <p className="text-xs text-blue-600 font-semibold">
+                    Lock in {formatPrice(individualPrice)}/class rate
                   </p>
                   <p className="text-xs text-orange-600 mt-1">
+                    After Aug 31: {formatPrice(PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31)}/class
+                  </p>
+                  <p className="text-xs text-orange-600">
                     Expires in 3 months
                   </p>
                 </div>
 
                 <Link
                   href="/packages"
-                  className="block w-full bg-orange-100 text-orange-800 text-center py-2 rounded hover:bg-orange-200 transition-colors text-sm font-medium"
+                  className="block w-full bg-orange-100 text-orange-800 text-center py-2 rounded hover:bg-orange-200 transition-colors text-sm font-medium border border-orange-200"
                 >
                   View Package Details →
                 </Link>

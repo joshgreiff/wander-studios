@@ -70,6 +70,9 @@ export default function Navigation() {
             <Link href="/contact" className="hover:text-orange-200 transition-colors">
               Contact
             </Link>
+            <Link href="/waiver" className="hover:text-orange-200 transition-colors">
+              Waiver
+            </Link>
             
             {user ? (
               <>
@@ -79,6 +82,11 @@ export default function Navigation() {
                 <Link href="/dashboard" className="hover:text-orange-200 transition-colors">
                   Dashboard
                 </Link>
+                {user.isAdmin && (
+                  <Link href="/admin" className="hover:text-orange-200 transition-colors">
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="hover:text-orange-200 transition-colors"

@@ -141,7 +141,10 @@ export default function DashboardPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Create a date object and format it in the local timezone
+    const date = new Date(dateString);
+    // Use toLocaleDateString without explicit timezone to use local timezone
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -150,7 +153,12 @@ export default function DashboardPage() {
   };
 
   const formatTime = (timeString: string) => {
-    return timeString;
+    // Convert 24-hour format to 12-hour format with AM/PM
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   const getRemainingClasses = (packageBooking: PackageBooking) => {

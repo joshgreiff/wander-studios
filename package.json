@@ -19,6 +19,11 @@
     "cleanup-packages": "node scripts/cleanup-packages.js",
     "check-packages": "node scripts/check-packages.js",
     "update-package-bookings": "node scripts/update-package-bookings.js",
+    "check-class-dates": "node scripts/check-class-dates.js",
+    "fix-class-dates": "node scripts/fix-class-dates.js",
+    "check-class-capacities": "node scripts/check-class-capacities.js",
+    "check-users": "node scripts/check-users.js",
+    "create-admin-user": "node scripts/create-admin-user.js",
     "analyze-emails": "node scripts/analyze-emails.js"
   },
   "dependencies": {

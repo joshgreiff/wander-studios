@@ -9,6 +9,11 @@ type Class = {
   description: string;
   address?: string;
   capacity: number;
+  bookings: Array<{
+    id: number;
+    name: string;
+    email: string;
+  }>;
 };
 
 export default function ClassesPage() {
@@ -41,13 +46,23 @@ export default function ClassesPage() {
                   <div className="font-semibold text-orange-900 text-lg">{c.date?.slice(0, 10)} {c.time}</div>
                   <div className="text-orange-800">{c.description}</div>
                   {c.address && <div className="text-orange-700 text-sm">📍 {c.address}</div>}
-                  <div className="text-orange-700 text-sm">Capacity: {c.capacity}</div>
+                  <div className="text-orange-700 text-sm">
+                    📊 {c.bookings?.length || 0} / {c.capacity} spots filled
+                    {c.bookings && c.bookings.length >= c.capacity && (
+                      <span className="text-red-600 font-semibold ml-2">• FULL</span>
+                    )}
+                  </div>
                 </div>
                 <button 
                   onClick={() => router.push(`/book/${c.id}`)}
-                  className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition"
+                  disabled={c.bookings && c.bookings.length >= c.capacity}
+                  className={`mt-4 sm:mt-0 font-semibold py-2 px-6 rounded transition ${
+                    c.bookings && c.bookings.length >= c.capacity
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-orange-600 text-white hover:bg-orange-700'
+                  }`}
                 >
-                  Book
+                  {c.bookings && c.bookings.length >= c.capacity ? 'Full' : 'Book'}
                 </button>
               </li>
             ))}

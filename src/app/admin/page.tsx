@@ -52,7 +52,7 @@ export default function AdminPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [waivers, setWaivers] = useState<Waiver[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 10 });
+  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20 });
   const [bookingForm, setBookingForm] = useState({ 
     classId: '', 
     name: '', 
@@ -64,7 +64,7 @@ export default function AdminPage() {
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 10 });
+  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20 });
   const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
   const [loginError, setLoginError] = useState('');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
