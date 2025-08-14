@@ -12,9 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const packageBookings = await prisma.packageBooking.findMany({
-      where: {
-        userId: Number(id)
-      },
+      where: { userId: Number(id) },
       include: {
         package: {
           select: {
@@ -24,22 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             classCount: true,
             price: true
           }
-        },
-        class: {
-          select: {
-            id: true,
-            date: true,
-            time: true,
-            description: true,
-            address: true,
-            isVirtual: true,
-            virtualLink: true
-          }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: { createdAt: 'desc' }
     });
 
     return res.status(200).json(packageBookings);

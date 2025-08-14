@@ -45,14 +45,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const packageBooking = await prisma.packageBooking.create({
       data: {
         packageId: Number(packageId),
-        classId: 1, // Placeholder - will be updated when classes are redeemed
         customerName,
         customerEmail,
         waiverName,
         waiverAgreed,
         paid: false, // Will be set to true after payment
         expiresAt,
-        userId: Number(userId)
+        userId: Number(userId),
+        classesUsed: 0,
+        classesRemaining: packageData.classCount
       }
     });
 

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -24,7 +24,7 @@ type PackageData = {
   paid: boolean;
 };
 
-export default function ThankYouPage() {
+function ThankYouContent() {
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [packageData, setPackageData] = useState<PackageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +51,8 @@ export default function ThankYouPage() {
           classId,
           email,
           name,
-          phone,
-          waiverName,
+          phone: phone || undefined,
+          waiverName: waiverName || undefined,
           waiverAgreed: waiverAgreed === 'true'
         });
       }
@@ -120,25 +120,19 @@ export default function ThankYouPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <p className="text-orange-600">
-                  You can now use your package to book classes. Each class will be deducted from your package.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    href="/classes"
-                    className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
-                  >
-                    Browse Classes
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
-                  >
-                    View Dashboard
-                  </Link>
-                </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/classes"
+                  className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  Browse Classes
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
+                >
+                  View Dashboard
+                </Link>
               </div>
             </>
           )}
@@ -224,5 +218,13 @@ export default function ThankYouPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ThankYouPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ThankYouContent />
+    </Suspense>
   );
 } 

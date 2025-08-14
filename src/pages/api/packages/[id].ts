@@ -25,17 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             price: true
           }
         },
-        class: {
-          select: {
-            id: true,
-            date: true,
-            time: true,
-            description: true,
-            address: true,
-            isVirtual: true,
-            virtualLink: true
-          }
-        },
         user: {
           select: {
             id: true,

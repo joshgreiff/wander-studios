@@ -1,44 +1,28 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [form, setForm] = useState({
-    name: '',
     email: '',
+    name: '',
     phone: '',
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Validate passwords match
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    // Validate password length
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters long');
       setLoading(false);
       return;
     }
@@ -50,33 +34,36 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: form.name,
           email: form.email,
+          name: form.name,
           phone: form.phone,
-          password: form.password,
+          password: form.password
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Dispatch custom event to update navigation
         window.dispatchEvent(new Event('userLogin'));
-        
-        // Redirect to dashboard or specified redirect URL
         const redirectUrl = searchParams?.get('redirect') || '/dashboard';
         router.push(redirectUrl);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Registration failed');
       }
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (_error) {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -86,33 +73,30 @@ export default function RegisterPage() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-orange-900">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-orange-700">
-            Join Wander Studios and start your fitness journey
+          <p className="mt-2 text-center text-sm text-orange-600">
+            Join Wander Studios and start booking classes
           </p>
         </div>
-        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-orange-700">
-                Full Name *
+                Full Name
               </label>
               <input
                 id="name"
                 name="name"
                 type="text"
-                autoComplete="name"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="Your full name"
                 value={form.name}
                 onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Your full name"
               />
             </div>
-            
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-orange-700">
-                Email Address *
+                Email address
               </label>
               <input
                 id="email"
@@ -120,32 +104,29 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="your@email.com"
                 value={form.email}
                 onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="your@email.com"
               />
             </div>
-            
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-orange-700">
-                Phone Number
+                Phone Number (optional)
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
-                autoComplete="tel"
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="(555) 123-4567"
                 value={form.phone}
                 onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="(555) 123-4567"
               />
             </div>
-            
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-orange-700">
-                Password *
+                Password
               </label>
               <input
                 id="password"
@@ -153,16 +134,15 @@ export default function RegisterPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="At least 6 characters"
                 value={form.password}
                 onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Create a password"
               />
             </div>
-            
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-orange-700">
-                Confirm Password *
+                Confirm Password
               </label>
               <input
                 id="confirmPassword"
@@ -170,10 +150,10 @@ export default function RegisterPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="Confirm your password"
                 value={form.confirmPassword}
                 onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Confirm your password"
               />
             </div>
           </div>
@@ -197,7 +177,7 @@ export default function RegisterPage() {
           <div className="text-center">
             <p className="text-sm text-orange-600">
               Already have an account?{' '}
-              <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400">
+              <Link href="/login" className="text-orange-800 hover:text-orange-900 underline">
                 Sign in here
               </Link>
             </p>
@@ -205,5 +185,13 @@ export default function RegisterPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 } 
