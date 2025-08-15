@@ -978,12 +978,24 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-6">
                 {(() => {
+                  // Define proper types
+                  type ClassGroup = {
+                    class: {
+                      id: number;
+                      date: string;
+                      time: string;
+                      description: string;
+                      capacity: number;
+                    } | null;
+                    bookings: typeof bookings;
+                  };
+
                   // Group bookings by class
-                  const bookingsByClass: Record<string, { class: any; bookings: any[] }> = bookings.reduce((acc: Record<string, { class: any; bookings: any[] }>, booking) => {
+                  const bookingsByClass: Record<string, ClassGroup> = bookings.reduce((acc: Record<string, ClassGroup>, booking) => {
                     const classKey = booking.class ? `${booking.class.id}-${booking.class.date}-${booking.class.time}` : 'no-class';
                     if (!acc[classKey]) {
                       acc[classKey] = {
-                        class: booking.class,
+                        class: booking.class || null,
                         bookings: []
                       };
                     }
