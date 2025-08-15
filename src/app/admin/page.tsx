@@ -972,37 +972,83 @@ export default function AdminPage() {
             </form>
 
             {/* Bookings List */}
-            <h3 className="font-semibold text-orange-900 mb-3">All Bookings</h3>
+            <h3 className="font-semibold text-orange-900 mb-3">Bookings by Class</h3>
             {bookings.length === 0 ? (
               <p className="text-orange-700">No bookings yet.</p>
             ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {bookings.map(booking => (
-                  <div key={booking.id} className="border rounded-lg p-3 bg-white">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-orange-900">{booking.name}</h4>
-                        <p className="text-sm text-orange-700">{booking.email}</p>
-                        {booking.phone && <p className="text-sm text-orange-700">{booking.phone}</p>}
-                        {booking.class && (
-                          <p className="text-sm text-orange-800">
-                            {booking.class.date?.slice(0, 10)} {booking.class.time} — {booking.class.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          booking.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {booking.paid ? 'Paid' : 'Unpaid'}
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(booking.createdAt).toLocaleDateString()}
+              <div className="space-y-6">
+                {(() => {
+                  // Group bookings by class
+                  const bookingsByClass: Record<string, { class: any; bookings: any[] }> = bookings.reduce((acc: Record<string, { class: any; bookings: any[] }>, booking) => {
+                    const classKey = booking.class ? `${booking.class.id}-${booking.class.date}-${booking.class.time}` : 'no-class';
+                    if (!acc[classKey]) {
+                      acc[classKey] = {
+                        class: booking.class,
+                        bookings: []
+                      };
+                    }
+                    acc[classKey].bookings.push(booking);
+                    return acc;
+                  }, {});
+
+                  // Sort classes by date (descending - most recent first)
+                  const sortedClasses = Object.values(bookingsByClass).sort((a, b) => {
+                    if (!a.class || !b.class) return 0;
+                    return new Date(b.class.date).getTime() - new Date(a.class.date).getTime();
+                  });
+
+                  return sortedClasses.map((classGroup, index) => (
+                    <div key={index} className="border rounded-lg p-4 bg-white">
+                      <div className="mb-3 pb-2 border-b border-orange-200">
+                        <h4 className="font-bold text-lg text-orange-900">
+                          {classGroup.class ? (
+                            <>
+                              {new Date(classGroup.class.date).toLocaleDateString()} at {classGroup.class.time}
+                              <span className="text-sm font-normal text-orange-700 ml-2">
+                                — {classGroup.class.description}
+                              </span>
+                            </>
+                          ) : (
+                            'Unknown Class'
+                          )}
+                        </h4>
+                        <p className="text-sm text-orange-600">
+                          {classGroup.bookings.length} booking{classGroup.bookings.length !== 1 ? 's' : ''}
+                          {classGroup.class && (
+                            <span className="ml-2">
+                              • Capacity: {classGroup.class.capacity} • 
+                              <span className={classGroup.bookings.length >= classGroup.class.capacity ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                                {classGroup.bookings.length >= classGroup.class.capacity ? ' FULL' : ` ${classGroup.class.capacity - classGroup.bookings.length} spots available`}
+                              </span>
+                            </span>
+                          )}
                         </p>
                       </div>
+                      
+                      <div className="space-y-2">
+                        {classGroup.bookings.map(booking => (
+                          <div key={booking.id} className="flex justify-between items-center p-2 bg-orange-50 rounded border border-orange-100">
+                            <div>
+                              <h5 className="font-semibold text-orange-900">{booking.name}</h5>
+                              <p className="text-sm text-orange-700">{booking.email}</p>
+                              {booking.phone && <p className="text-sm text-orange-700">{booking.phone}</p>}
+                            </div>
+                            <div className="text-right">
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                booking.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {booking.paid ? 'Paid' : 'Unpaid'}
+                              </span>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {new Date(booking.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             )}
           </div>
