@@ -47,18 +47,49 @@ function ThankYouContent() {
     } else {
       // Handle individual class booking
       if (classId && email && name) {
-        setBookingData({
+        const bookingData = {
           classId,
           email,
           name,
           phone: phone || undefined,
           waiverName: waiverName || undefined,
           waiverAgreed: waiverAgreed === 'true'
-        });
-    }
+        };
+        setBookingData(bookingData);
+        
+        // Create the actual booking
+        createBooking(bookingData);
+      }
     }
     setLoading(false);
   }, [searchParams]);
+
+  const createBooking = async (bookingData: BookingData) => {
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to create booking:', errorData);
+        // You might want to show an error message to the user here
+      } else {
+        console.log('Booking created successfully');
+        // Store a flag to show that booking was linked to user (if applicable)
+        const data = await response.json();
+        if (data.userLinked) {
+          localStorage.setItem('bookingLinkedToUser', 'true');
+        }
+      }
+    } catch (error) {
+      console.error('Error creating booking:', error);
+    }
+  };
 
   const fetchPackageData = async (packageBookingId: string) => {
     try {
