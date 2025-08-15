@@ -63,10 +63,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Making request to Speed API...');
     
+    // Get dynamic pricing with 5% discount
+    const basePrice = new Date() <= new Date('2025-08-31') ? 10 : 14; // $10 before Aug 31, $14 after
+    const discountedPrice = basePrice * 0.95; // 5% discount
+
     const requestBody = {
-      amount: 9.50,
+      amount: discountedPrice,
       currency: 'USD',
-      description: 'Class Booking',
+      description: 'Class Booking (Bitcoin - 5% off)',
       customer_email: email,
       metadata: { name, classId },
       success_url: `https://wandermovement.space/thank-you?classId=${classId}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone || '')}&waiverName=${encodeURIComponent(waiverName)}&waiverAgreed=${waiverAgreed}`,

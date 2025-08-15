@@ -78,7 +78,7 @@ export default function BookClassPage() {
       if (response.ok) {
         const data = await response.json();
         setClassItem(data);
-      } else {
+    } else {
         router.push('/classes');
       }
     } catch (error) {
@@ -126,7 +126,7 @@ export default function BookClassPage() {
       if (paymentMethod === 'package' && selectedPackageId && user) {
         // Use package redemption
         response = await fetch('/api/packages/redeem', {
-          method: 'POST',
+        method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -143,7 +143,7 @@ export default function BookClassPage() {
         });
       } else {
         // Regular booking - determine payment method
-        const endpoint = paymentMethod === 'bitcoin' ? '/api/bitcoin-invoice' : '/api/bookings';
+        const endpoint = paymentMethod === 'bitcoin' ? '/api/bitcoin-invoice' : '/api/square-checkout';
         
         response = await fetch(endpoint, {
           method: 'POST',
@@ -152,8 +152,7 @@ export default function BookClassPage() {
           },
           body: JSON.stringify({
             classId: classItem?.id,
-            ...form,
-            paymentMethod
+            ...form
           }),
         });
       }
@@ -162,9 +161,12 @@ export default function BookClassPage() {
         const data = await response.json();
         if (data.url) {
           window.location.href = data.url;
-        } else {
+        } else if (paymentMethod === 'package') {
           // Package redemption was successful, redirect to thank you
           router.push(`/thank-you?type=package-redemption&classId=${classItem?.id}&packageBookingId=${selectedPackageId}`);
+        } else {
+          // Regular booking was successful, redirect to thank you
+          router.push(`/thank-you?type=booking&classId=${classItem?.id}`);
         }
       } else {
         const errorData = await response.json();
@@ -273,7 +275,7 @@ export default function BookClassPage() {
                 )}
               </div>
             </div>
-
+            
             {/* Waiver Reminder */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <div className="flex items-start space-x-3">
@@ -325,8 +327,8 @@ export default function BookClassPage() {
                   <div className="text-xs text-blue-600 font-semibold">Lock in current rate</div>
                 </div>
               </div>
-            </div>
-
+                  </div>
+                  
             {/* Package Redemption Section */}
             {user && availablePackages.length > 0 && (
               <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-6 mb-6">
@@ -386,7 +388,7 @@ export default function BookClassPage() {
                       required
                       className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
-                  </div>
+                    </div>
                   <div>
                     <label className="block text-sm font-medium text-orange-700 mb-1">
                       Email *
@@ -443,8 +445,8 @@ export default function BookClassPage() {
                   <label className="text-sm text-orange-700">
                     I agree to the liability waiver and understand the risks associated with physical activity. *
                   </label>
-                </div>
-
+                  </div>
+                  
                 {/* Submit Button for Package Redemption */}
                 {selectedPackageId && (
                   <button
@@ -476,22 +478,22 @@ export default function BookClassPage() {
                     </button>
 
                     {/* Bitcoin Payment */}
-                    <button
-                      type="button"
+                  <button
+                    type="button"
                       onClick={() => handlePaymentClick('bitcoin')}
                       disabled={booking}
                       className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-yellow-600 hover:bg-yellow-700 text-white flex items-center justify-center space-x-2"
                     >
                       <span>₿</span>
                       <span>Pay with Bitcoin - {formatPrice(individualPrice * 0.95)} (5% off!)</span>
-                    </button>
+                  </button>
 
                     <div className="text-center text-xs text-gray-500 mt-2">
                       Bitcoin payments receive a 5% discount
                     </div>
                   </div>
                 )}
-              </form>
+            </form>
             </div>
           </div>
 

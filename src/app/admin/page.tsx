@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
+import { useRouter } from 'next/navigation';
+
+type User = {
+  id: number;
+  email: string;
+  name: string;
+  isAdmin?: boolean;
+};
 
 type Class = {
   id: number;
@@ -47,8 +55,10 @@ type Booking = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState<Class[]>([]);
   const [waivers, setWaivers] = useState<Waiver[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -62,11 +72,9 @@ export default function AdminPage() {
     waiverAgreed: true, 
     paid: true 
   });
-  const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20 });
   const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
-  const [loginError, setLoginError] = useState('');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [classBookings, setClassBookings] = useState<Booking[]>([]);
   const [bulkImportData, setBulkImportData] = useState('');
@@ -78,21 +86,37 @@ export default function AdminPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
 
   useEffect(() => {
-    // Auto-authenticate if localStorage says so
-    if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true') {
-      setAuthenticated(true);
+    // Check if user is logged in and has admin privileges
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUser(user);
+      
+      if (user.isAdmin) {
+        setAuthenticated(true);
+      } else {
+        // User is logged in but not admin - redirect to home
+        router.push('/');
+        return;
+      }
+    } else {
+      // No user logged in - redirect to login
+      router.push('/login?redirect=/admin');
+      return;
     }
-  }, []);
+    
+    setLoading(false);
+  }, [router]);
 
   useEffect(() => {
-    if (authenticated) {
+    if (authenticated && user?.isAdmin) {
       fetchClasses();
       fetchWaivers();
       fetchBookings();
       fetchSquareRevenue();
       generateQRCode();
     }
-  }, [authenticated]);
+  }, [authenticated, user]);
 
   async function fetchClasses() {
     setLoading(true);
@@ -142,46 +166,10 @@ export default function AdminPage() {
     setClassBookings([]);
   }
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginError('');
-    setLoading(true);
-    
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        setAuthenticated(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('isAdmin', 'true');
-          // Dispatch custom event to notify navigation
-          window.dispatchEvent(new CustomEvent('adminLoginStatusChanged', { detail: { isAdmin: true } }));
-        }
-      } else {
-        setLoginError(data.error || 'Login failed');
-      }
-    } catch {
-      setLoginError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   function handleLogout() {
-    setAuthenticated(false);
-    setPassword('');
-    setLoginError('');
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isAdmin');
-      // Dispatch custom event to notify navigation
-      window.dispatchEvent(new CustomEvent('adminLoginStatusChanged', { detail: { isAdmin: false } }));
-    }
+    // Clear user data and redirect to home
+    localStorage.removeItem('user');
+    router.push('/');
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -561,38 +549,31 @@ export default function AdminPage() {
     }
   };
 
-  if (!authenticated) {
+  if (loading) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
         <section className="bg-white/90 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center">
-          <h1 className="text-2xl font-bold mb-4 text-orange-900">Admin Login</h1>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="border rounded px-4 py-2"
-              style={{ color: '#b45309' }}
-              required
-            />
-            {loginError && (
-              <p className="text-red-600 text-sm text-center">{loginError}</p>
-            )}
-            <button 
-              type="submit" 
-              className="bg-orange-600 text-white font-semibold py-2 rounded hover:bg-orange-700 disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-          <style jsx global>{`
-            input[type='password']::placeholder {
-              color: #f59e42 !important;
-              opacity: 1;
-            }
-          `}</style>
+          <h1 className="text-2xl font-bold mb-4 text-orange-900">Loading...</h1>
+          <p className="text-gray-600">Checking admin access...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!authenticated || !user?.isAdmin) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
+        <section className="bg-white/90 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center">
+          <h1 className="text-2xl font-bold mb-4 text-orange-900">Access Denied</h1>
+          <p className="text-gray-600 text-center mb-4">
+            You need admin privileges to access this page.
+          </p>
+          <button 
+            onClick={() => router.push('/')}
+            className="bg-orange-600 text-white font-semibold py-2 px-4 rounded hover:bg-orange-700"
+          >
+            Go Home
+          </button>
         </section>
       </main>
     );

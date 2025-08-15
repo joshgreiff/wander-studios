@@ -55,7 +55,7 @@ function ThankYouContent() {
           waiverName: waiverName || undefined,
           waiverAgreed: waiverAgreed === 'true'
         });
-      }
+    }
     }
     setLoading(false);
   }, [searchParams]);
@@ -85,7 +85,7 @@ function ThankYouContent() {
       <div className="max-w-2xl mx-auto py-12 px-4">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           {/* Success Icon */}
-          <div className="mb-6">
+            <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -134,12 +134,12 @@ function ThankYouContent() {
                   View Dashboard
                 </Link>
               </div>
-            </>
-          )}
+          </>
+        )}
 
           {/* Individual Class Booking Success */}
           {bookingData && (
-            <>
+          <>
               <h1 className="text-3xl font-bold text-orange-900 mb-4">
                 Booking Confirmed!
               </h1>
@@ -203,8 +203,8 @@ function ThankYouContent() {
                   Buy Class Package
                 </Link>
               </div>
-            </>
-          )}
+          </>
+        )}
 
           {/* Contact Information */}
           <div className="mt-8 pt-6 border-t border-orange-200">

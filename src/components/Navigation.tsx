@@ -39,17 +39,17 @@ export default function Navigation() {
       } else {
         setUser(null);
       }
-    };
+      };
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('userLogin', handleUserChange);
     window.addEventListener('userLogout', handleUserChange);
 
-    return () => {
+      return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('userLogin', handleUserChange);
       window.removeEventListener('userLogout', handleUserChange);
-    };
+      };
   }, []);
 
   const toggleMobileMenu = () => {
@@ -86,15 +86,15 @@ export default function Navigation() {
               <li><Link href="/packages" className="hover:underline">Packages</Link></li>
               <li><Link href="/dashboard" className="hover:underline">Dashboard</Link></li>
               {user.isAdmin && (
-                <li>
-                  <Link 
-                    href="/admin" 
-                    className="hover:underline bg-white/20 px-2 py-1 rounded text-sm"
-                    title="Admin Dashboard"
-                  >
-                    Admin
-                  </Link>
-                </li>
+            <li>
+              <Link 
+                href="/admin" 
+                className="hover:underline bg-white/20 px-2 py-1 rounded text-sm"
+                title="Admin Dashboard"
+              >
+                Admin
+              </Link>
+            </li>
               )}
               <li>
                 <button onClick={handleLogout} className="hover:underline">
@@ -144,16 +144,16 @@ export default function Navigation() {
                 <li><Link href="/packages" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Packages</Link></li>
                 <li><Link href="/dashboard" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Dashboard</Link></li>
                 {user.isAdmin && (
-                  <li>
-                    <Link 
-                      href="/admin" 
-                      onClick={closeMobileMenu}
-                      className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
-                      title="Admin Dashboard"
-                    >
-                      Admin
-                    </Link>
-                  </li>
+              <li>
+                <Link 
+                  href="/admin" 
+                  onClick={closeMobileMenu}
+                  className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
+                  title="Admin Dashboard"
+                >
+                  Admin
+                </Link>
+              </li>
                 )}
                 <li>
                   <button 

@@ -4,6 +4,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Simple pricing function for server-side use
+function getCurrentIndividualClassPrice(): number {
+  const now = new Date();
+  const august31 = new Date('2025-08-31');
+  return now <= august31 ? 10 : 14; // $10 before Aug 31, $14 after
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -60,6 +67,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       token: SQUARE_ACCESS_TOKEN,
     });
 
+    // Get dynamic pricing
+    const priceInDollars = getCurrentIndividualClassPrice();
+    const priceInCents = priceInDollars * 100;
+
     // Pass the full order object directly to paymentLinks.create
     const paymentLinkResponse = await client.checkout.paymentLinks.create({
       idempotencyKey: `${classId}-${Date.now()}`,
@@ -70,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             name: 'Class Booking',
             quantity: '1',
             basePriceMoney: {
-              amount: BigInt(1000), // $10.00 in cents, bigint
+              amount: BigInt(priceInCents),
               currency: 'USD',
             },
           },
