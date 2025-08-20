@@ -285,11 +285,11 @@ export default function BookClassPage() {
                       onClick={() => {
                         const event = createClassCalendarEvent(
                           classItem.description,
-                          classItem.date,
+                          new Date(classItem.date),
                           classItem.time,
-                          60, // 60 minutes duration
+                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`,
                           classItem.address,
-                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`
+                          classItem.virtualLink
                         );
                         const icalContent = generateICalEvent(event);
                         downloadCalendarFile(icalContent, `wander-movement-${classItem.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
@@ -303,11 +303,11 @@ export default function BookClassPage() {
                       onClick={() => {
                         const event = createClassCalendarEvent(
                           classItem.description,
-                          classItem.date,
+                          new Date(classItem.date),
                           classItem.time,
-                          60,
+                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`,
                           classItem.address,
-                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`
+                          classItem.virtualLink
                         );
                         const googleUrl = generateGoogleCalendarUrl(event);
                         window.open(googleUrl, '_blank');

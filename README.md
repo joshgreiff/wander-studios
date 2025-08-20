@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wander Studios
 
-## Getting Started
+A modern web application for managing fitness classes, bookings, and packages.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Virtual Classes
+- **Virtual Class Support**: Classes can be marked as virtual with Zoom/meeting links
+- **Email Notifications**: Automatic email notifications with virtual class links
+- **Calendar Integration**: Virtual links included in calendar events
+- **Admin Interface**: Easy management of virtual class settings
+
+### Core Features
+- User registration and authentication
+- Class booking system
+- Package management
+- Payment processing (Square, Bitcoin)
+- Waiver management
+- Admin dashboard
+- Calendar integration (Apple/Google)
+
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- Square API credentials
+- Resend API key (for email notifications)
+
+### Environment Variables
+Create a `.env.local` file with the following variables:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/wander_studios"
+
+# Square API
+SQUARE_APPLICATION_ID="your_square_app_id"
+SQUARE_ACCESS_TOKEN="your_square_access_token"
+SQUARE_LOCATION_ID="your_square_location_id"
+
+# Resend API (for virtual class emails)
+RESEND_API_KEY="your_resend_api_key"
+
+# Bitcoin (optional)
+BITCOIN_API_KEY="your_bitcoin_api_key"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Set up the database:
+   ```bash
+   npx prisma migrate dev
+   npx prisma generate
+   ```
 
-## Learn More
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+## Virtual Class Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Email Configuration
+1. Sign up for a [Resend](https://resend.com) account
+2. Add your domain or use the provided subdomain
+3. Add the `RESEND_API_KEY` to your environment variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Creating Virtual Classes
+1. Log in as an admin
+2. Go to the admin dashboard
+3. Create a new class
+4. Check "Virtual Class" checkbox
+5. Add the virtual meeting link (Zoom, Google Meet, etc.)
+6. Save the class
 
-## Deploy on Vercel
+### Email Templates
+Virtual class emails include:
+- Class details and timing
+- Virtual meeting link
+- Pre-class preparation tips
+- Contact information
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Sales Tax
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application includes a basic sales tax calculation system based on customer location. For production use, consider integrating with a comprehensive tax service like:
+- TaxJar
+- Avalara
+- Stripe Tax
+
+## API Endpoints
+
+### Classes
+- `GET /api/classes` - List all classes
+- `POST /api/classes` - Create a new class
+- `PUT /api/classes/[id]` - Update a class
+- `DELETE /api/classes/[id]` - Archive a class
+
+### Bookings
+- `GET /api/bookings` - List all bookings
+- `POST /api/bookings` - Create a booking
+- `GET /api/bookings?classId=[id]` - Get bookings for a class
+
+### Packages
+- `GET /api/packages` - List all packages
+- `POST /api/packages/purchase` - Purchase a package
+- `POST /api/packages/redeem` - Redeem a package class
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

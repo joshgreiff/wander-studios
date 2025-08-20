@@ -18,6 +18,8 @@ type Class = {
   description: string;
   address?: string;
   capacity: number;
+  isVirtual?: boolean;
+  virtualLink?: string;
 };
 
 type Waiver = {
@@ -63,7 +65,7 @@ export default function AdminPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [waivers, setWaivers] = useState<Waiver[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20 });
+  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, isVirtual: false, virtualLink: '' });
   const [bookingForm, setBookingForm] = useState({ 
     classId: '', 
     name: '', 
@@ -74,7 +76,7 @@ export default function AdminPage() {
     paid: true 
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20 });
+  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, isVirtual: false, virtualLink: '' });
   const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [classBookings, setClassBookings] = useState<Booking[]>([]);
@@ -188,13 +190,15 @@ export default function AdminPage() {
       time: classData.time,
       description: classData.description,
       address: classData.address || '',
-      capacity: classData.capacity
+      capacity: classData.capacity,
+      isVirtual: classData.isVirtual || false,
+      virtualLink: classData.virtualLink || ''
     });
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setEditForm({ date: '', time: '', description: '', address: '', capacity: 10 });
+    setEditForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
@@ -209,7 +213,7 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setEditingId(null);
-      setEditForm({ date: '', time: '', description: '', address: '', capacity: 10 });
+      setEditForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
       fetchClasses();
     } else {
       alert('Failed to update class');
@@ -226,7 +230,7 @@ export default function AdminPage() {
       body: JSON.stringify(form),
     });
     if (res.ok) {
-      setForm({ date: '', time: '', description: '', address: '', capacity: 10 });
+      setForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
       fetchClasses();
     } else {
       alert('Failed to add class');
@@ -683,6 +687,32 @@ export default function AdminPage() {
                 <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="address">Address (optional)</label>
                 <input type="text" id="address" name="address" value={form.address} onChange={handleChange} className="border rounded px-2 py-1" placeholder="Class location address" />
               </div>
+              <div className="flex items-center gap-2 mb-2">
+                <input 
+                  type="checkbox" 
+                  id="isVirtual" 
+                  name="isVirtual" 
+                  checked={form.isVirtual} 
+                  onChange={(e) => setForm(prev => ({ ...prev, isVirtual: e.target.checked }))} 
+                  className="rounded"
+                />
+                <label className="text-sm font-bold text-brown-700" htmlFor="isVirtual">Virtual Class</label>
+              </div>
+              {form.isVirtual && (
+                <div className="flex flex-col">
+                  <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="virtualLink">Virtual Class Link</label>
+                  <input 
+                    type="url" 
+                    id="virtualLink" 
+                    name="virtualLink" 
+                    value={form.virtualLink} 
+                    onChange={handleChange} 
+                    className="border rounded px-2 py-1" 
+                    placeholder="https://zoom.us/j/..." 
+                    required={form.isVirtual}
+                  />
+                </div>
+              )}
               <button type="submit" className="bg-pink-600 text-white font-semibold py-2 rounded hover:bg-pink-700" disabled={loading}>{loading ? 'Saving...' : 'Add Class'}</button>
             </form>
             {loading && <div className="text-pink-700 mb-2">Loading...</div>}
@@ -714,6 +744,30 @@ export default function AdminPage() {
                         <label className="text-sm font-bold text-brown-700 mb-1">Address (optional)</label>
                         <input type="text" name="address" value={editForm.address} onChange={handleEditChange} className="border rounded px-2 py-1" placeholder="Class location address" />
                       </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input 
+                          type="checkbox" 
+                          name="isVirtual" 
+                          checked={editForm.isVirtual} 
+                          onChange={(e) => setEditForm(prev => ({ ...prev, isVirtual: e.target.checked }))} 
+                          className="rounded"
+                        />
+                        <label className="text-sm font-bold text-brown-700">Virtual Class</label>
+                      </div>
+                      {editForm.isVirtual && (
+                        <div className="flex flex-col">
+                          <label className="text-sm font-bold text-brown-700 mb-1">Virtual Class Link</label>
+                          <input 
+                            type="url" 
+                            name="virtualLink" 
+                            value={editForm.virtualLink} 
+                            onChange={handleEditChange} 
+                            className="border rounded px-2 py-1" 
+                            placeholder="https://zoom.us/j/..." 
+                            required={editForm.isVirtual}
+                          />
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         <button type="submit" className="bg-green-600 text-white font-semibold py-1 px-3 rounded hover:bg-green-700 text-sm" disabled={loading}>
                           {loading ? 'Saving...' : 'Save'}
@@ -727,8 +781,12 @@ export default function AdminPage() {
                     // Display mode
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex-1">
-                        <span className="font-semibold text-brown-900">{c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})</span>
-                        {c.address && <div className="text-sm text-brown-700 mt-1">📍 {c.address}</div>}
+                        <span className="font-semibold text-brown-900">
+                          {c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})
+                          {c.isVirtual && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Virtual</span>}
+                        </span>
+                        {c.address && !c.isVirtual && <div className="text-sm text-brown-700 mt-1">📍 {c.address}</div>}
+                        {c.isVirtual && c.virtualLink && <div className="text-sm text-blue-700 mt-1">🔗 <a href={c.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">Virtual Link</a></div>}
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <button onClick={() => viewClassDetails(c)} className="text-green-600 hover:underline text-sm">View Details</button>

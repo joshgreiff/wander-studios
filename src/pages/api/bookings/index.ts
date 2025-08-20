@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { sendVirtualClassConfirmation } from '@/utils/email';
 
 const prisma = new PrismaClient();
 
@@ -68,6 +69,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           userId: existingUser?.id || null // Auto-link to existing user if found
         }
       });
+
+      // Send virtual class email if applicable
+      if (classItem.isVirtual && classItem.virtualLink) {
+        try {
+          await sendVirtualClassConfirmation({
+            customerName: name,
+            customerEmail: email,
+            className: classItem.description,
+            classDate: new Date(classItem.date).toLocaleDateString(),
+            classTime: classItem.time,
+            virtualLink: classItem.virtualLink,
+          });
+        } catch (emailError) {
+          console.error('Error sending virtual class email:', emailError);
+          // Don't fail the booking if email fails
+        }
+      }
 
       return res.status(201).json({
         booking,

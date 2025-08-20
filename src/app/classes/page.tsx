@@ -17,6 +17,8 @@ type Class = {
   description: string;
   capacity: number;
   address?: string;
+  isVirtual?: boolean;
+  virtualLink?: string;
   bookings?: Array<{ id: number }>;
 };
 
@@ -35,18 +37,53 @@ export default function ClassesPage() {
     fetch('/api/classes')
       .then(res => res.json())
       .then(data => {
+        console.log('Classes data:', data); // Debug: see the actual date format
         setClasses(data);
         setLoading(false);
       });
   }, []);
 
-  const formatDateTime = (date: string, _time: string) => {
-    const d = new Date(date);
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    const hours = d.getHours();
-    const minutes = d.getMinutes();
-    return `${month}/${day} ${hours}:${minutes.toString().padStart(2, '0')}`;
+  const formatDateTime = (date: string, time: string) => {
+    try {
+      // Parse the date string to extract year, month, day
+      // Handle both ISO format (2025-08-31T00:00:00.000Z) and simple format (2025-08-31)
+      let year: number, month: number, day: number;
+      
+      if (date.includes('T')) {
+        // ISO format: extract date part before 'T'
+        const datePart = date.split('T')[0];
+        [year, month, day] = datePart.split('-').map(Number);
+      } else {
+        // Simple format: YYYY-MM-DD
+        [year, month, day] = date.split('-').map(Number);
+      }
+      
+      // Validate the parsed values
+      if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+        console.error('Invalid date components:', { year, month, day, originalDate: date });
+        return 'Date Error';
+      }
+      
+      // Create a date object to get the day of the week
+      const dateObj = new Date(year, month - 1, day);
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayOfWeek = dayNames[dateObj.getDay()];
+      
+      // Parse the time string (format: "HH:MM")
+      const [hours, minutes] = time.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) {
+        console.error('Invalid time components:', { hours, minutes, originalTime: time });
+        return 'Time Error';
+      }
+      
+      const hour = hours % 12 || 12;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      return `${dayOfWeek} ${month}/${day} ${hour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Date:', date, 'Time:', time);
+      return 'Date Error';
+    }
   };
 
   return (
@@ -67,7 +104,10 @@ export default function ClassesPage() {
               return (
                 <li key={c.id} className="border border-warm-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-warm-50/80 shadow">
                   <div className="flex-1">
-                    <div className="font-serif font-semibold text-brown-800 text-lg">{formatDateTime(c.date, c.time)}</div>
+                    <div className="font-serif font-semibold text-brown-800 text-lg">
+                      {formatDateTime(c.date, c.time)}
+                      {c.isVirtual && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Virtual</span>}
+                    </div>
                     <div className="text-brown-700 font-serif">{c.description}</div>
                     <div className="text-brown-600 text-sm font-serif">
                       {isFull ? (
@@ -76,6 +116,13 @@ export default function ClassesPage() {
                         <span>Available Spots: {availableSpots}/{c.capacity}</span>
                       )}
                     </div>
+                    {c.isVirtual && c.virtualLink && (
+                      <div className="text-blue-700 text-sm mt-1">
+                        <a href={c.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
+                          🔗 Virtual Class Link
+                        </a>
+                      </div>
+                    )}
                     
                     {/* Calendar Integration for Logged-in Users */}
                     {user && (
@@ -84,11 +131,11 @@ export default function ClassesPage() {
                           onClick={() => {
                             const event = createClassCalendarEvent(
                               c.description,
-                              c.date,
+                              new Date(c.date),
                               c.time,
-                              60,
+                              `Join us for ${c.description} at Wander Movement!${c.isVirtual && c.virtualLink ? `\n\nVirtual Class Link: ${c.virtualLink}` : ''}`,
                               c.address,
-                              `Join us for ${c.description} at Wander Movement!`
+                              c.virtualLink
                             );
                             const icalContent = generateICalEvent(event);
                             downloadCalendarFile(icalContent, `wander-movement-${c.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
@@ -102,11 +149,11 @@ export default function ClassesPage() {
                           onClick={() => {
                             const event = createClassCalendarEvent(
                               c.description,
-                              c.date,
+                              new Date(c.date),
                               c.time,
-                              60,
+                              `Join us for ${c.description} at Wander Movement!${c.isVirtual && c.virtualLink ? `\n\nVirtual Class Link: ${c.virtualLink}` : ''}`,
                               c.address,
-                              `Join us for ${c.description} at Wander Movement!`
+                              c.virtualLink
                             );
                             const googleUrl = generateGoogleCalendarUrl(event);
                             window.open(googleUrl, '_blank');

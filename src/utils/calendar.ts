@@ -1,68 +1,70 @@
 export interface CalendarEvent {
   title: string;
   description: string;
+  startDate: Date;
+  endDate: Date;
   location?: string;
-  startDate: string;
-  endDate: string;
-  organizer?: {
-    name: string;
-    email: string;
-  };
+  virtualLink?: string;
 }
 
 export function generateICalEvent(event: CalendarEvent): string {
-  const formatDate = (date: string) => {
-    return new Date(date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   };
 
-  const escapeText = (text: string) => {
-    return text
-      .replace(/[\\;,]/g, '\\$&')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '\\r');
-  };
+  let location = event.location || '';
+  if (event.virtualLink) {
+    location = event.virtualLink;
+  }
 
-  const ical = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Wander Movement//Class Booking//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `UID:${Date.now()}@wandermovement.com`,
-    `DTSTAMP:${formatDate(new Date().toISOString())}`,
-    `DTSTART:${formatDate(event.startDate)}`,
-    `DTEND:${formatDate(event.endDate)}`,
-    `SUMMARY:${escapeText(event.title)}`,
-    `DESCRIPTION:${escapeText(event.description)}`,
-    ...(event.location ? [`LOCATION:${escapeText(event.location)}`] : []),
-    ...(event.organizer ? [
-      `ORGANIZER;CN=${escapeText(event.organizer.name)}:mailto:${event.organizer.email}`
-    ] : []),
-    'STATUS:CONFIRMED',
-    'SEQUENCE:0',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
+  let description = event.description;
+  if (event.virtualLink) {
+    description += `\n\nVirtual Class Link: ${event.virtualLink}`;
+  }
 
-  return ical;
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wander Studios//Virtual Class//EN
+BEGIN:VEVENT
+UID:${Date.now()}@wanderstudios.com
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(event.startDate)}
+DTEND:${formatDate(event.endDate)}
+SUMMARY:${event.title}
+DESCRIPTION:${description.replace(/\n/g, '\\n')}
+LOCATION:${location}
+END:VEVENT
+END:VCALENDAR`;
 }
 
 export function generateGoogleCalendarUrl(event: CalendarEvent): string {
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  let location = event.location || '';
+  if (event.virtualLink) {
+    location = event.virtualLink;
+  }
+
+  let description = event.description;
+  if (event.virtualLink) {
+    description += `\n\nVirtual Class Link: ${event.virtualLink}`;
+  }
+
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: event.title,
-    dates: `${new Date(event.startDate).toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${new Date(event.endDate).toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-    details: event.description,
-    ...(event.location && { location: event.location }),
-    ...(event.organizer && { ctz: 'America/New_York' })
+    dates: `${formatDate(event.startDate)}/${formatDate(event.endDate)}`,
+    details: description,
+    location: location,
   });
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 export function downloadCalendarFile(icalContent: string, filename: string) {
-  const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+  const blob = new Blob([icalContent], { type: 'text/calendar' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -75,24 +77,25 @@ export function downloadCalendarFile(icalContent: string, filename: string) {
 
 export function createClassCalendarEvent(
   className: string,
-  date: string,
-  time: string,
-  duration: number = 60,
-  location?: string,
-  description?: string
+  classDate: Date,
+  classTime: string,
+  classDescription: string,
+  classAddress?: string,
+  virtualLink?: string
 ): CalendarEvent {
-  const startDate = new Date(`${date}T${time}`);
-  const endDate = new Date(startDate.getTime() + duration * 60000);
+  const [hours, minutes] = classTime.split(':').map(Number);
+  const startDate = new Date(classDate);
+  startDate.setHours(hours, minutes, 0, 0);
+  
+  const endDate = new Date(startDate);
+  endDate.setHours(hours + 1, minutes, 0, 0); // Assume 1 hour class
 
   return {
-    title: `Wander Movement - ${className}`,
-    description: description || `Join us for ${className} at Wander Movement!`,
-    location: location || 'Wander Movement Studio',
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    organizer: {
-      name: 'Wander Movement',
-      email: 'hello@wandermovement.com'
-    }
+    title: className,
+    description: classDescription,
+    startDate,
+    endDate,
+    location: classAddress,
+    virtualLink,
   };
 } 

@@ -17,9 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
   if (req.method === 'POST') {
-    const { date, time, description, address, capacity } = req.body;
+    const { date, time, description, address, capacity, isVirtual, virtualLink } = req.body;
     if (!date || !time || !description || !capacity) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+    if (isVirtual && !virtualLink) {
+      return res.status(400).json({ error: 'Virtual link is required for virtual classes' });
     }
     try {
     const newClass = await prisma.class.create({
@@ -30,6 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           address: address || null,
         capacity: Number(capacity),
           archived: false,
+          isVirtual: Boolean(isVirtual),
+          virtualLink: virtualLink || null,
       },
     });
     return res.status(201).json(newClass);
