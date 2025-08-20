@@ -14,7 +14,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800">Our Philosophy</h2>
           <p className="mb-6">
             At Wander Movement, we embrace the philosophy that every body is unique and every journey is personal. 
-            We don't believe in one-size-fits-all approaches. Instead, we celebrate individuality and create 
+            We don&apos;t believe in one-size-fits-all approaches. Instead, we celebrate individuality and create 
             experiences that honor your unique needs, abilities, and goals.
           </p>
           
@@ -36,9 +36,9 @@ export default function AboutPage() {
           
           <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800">Our Community</h2>
           <p className="mb-6">
-            We're more than just a movement studio—we're a community of individuals supporting each other 
-            on their wellness journeys. Whether you're a beginner or an experienced practitioner, 
-            you'll find a warm, supportive environment where you can grow, learn, and thrive.
+            We&apos;re more than just a movement studio—we&apos;re a community of individuals supporting each other 
+            on their wellness journeys. Whether you&apos;re a beginner or an experienced practitioner, 
+            you&apos;ll find a warm, supportive environment where you can grow, learn, and thrive.
           </p>
           
           <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800">Meet Leah</h2>
@@ -49,7 +49,7 @@ export default function AboutPage() {
           </p>
           
           <p className="text-brown-800 font-serif font-semibold">
-            Ready to begin your journey? We can't wait to welcome you to our community.
+            Ready to begin your journey? We can&apos;t wait to welcome you to our community.
           </p>
         </div>
       </section>

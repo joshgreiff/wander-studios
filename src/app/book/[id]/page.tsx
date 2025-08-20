@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getCurrentIndividualClassPrice, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
 import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
@@ -57,23 +57,16 @@ export default function BookClassPage() {
   const individualPrice = getCurrentIndividualClassPrice();
   const packagePrice = getPackagePrice();
 
-  useEffect(() => {
-    if (params?.id) {
-      fetchClass(Number(params.id));
-      checkUserLogin();
-    }
-  }, [params?.id]);
-
-  const checkUserLogin = () => {
+  const checkUserLogin = useCallback(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       const userObj = JSON.parse(userData);
       setUser(userObj);
       fetchAvailablePackages(userObj.id);
     }
-  };
+  }, [fetchAvailablePackages]);
 
-  const fetchClass = async (classId: number) => {
+  const fetchClass = useCallback(async (classId: number) => {
     try {
       const response = await fetch(`/api/classes/${classId}`);
       if (response.ok) {
@@ -88,9 +81,9 @@ export default function BookClassPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const fetchAvailablePackages = async (userId: number) => {
+  const fetchAvailablePackages = useCallback(async (userId: number) => {
     try {
       const response = await fetch(`/api/users/${userId}/available-packages`);
       if (response.ok) {
@@ -100,7 +93,14 @@ export default function BookClassPage() {
     } catch (error) {
       console.error('Error fetching available packages:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (params?.id) {
+      fetchClass(Number(params.id));
+      checkUserLogin();
+    }
+  }, [params?.id, fetchClass, checkUserLogin]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;

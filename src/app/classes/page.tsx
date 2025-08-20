@@ -1,27 +1,29 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
+
+type User = {
+  id: number;
+  email: string;
+  name: string;
+  isAdmin?: boolean;
+};
 
 type Class = {
   id: number;
   date: string;
   time: string;
   description: string;
-  address?: string;
   capacity: number;
-  bookings: Array<{
-    id: number;
-    name: string;
-    email: string;
-  }>;
+  address?: string;
+  bookings?: Array<{ id: number }>;
 };
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -38,7 +40,7 @@ export default function ClassesPage() {
       });
   }, []);
 
-  const formatDateTime = (date: string, time: string) => {
+  const formatDateTime = (date: string, _time: string) => {
     const d = new Date(date);
     const month = d.getMonth() + 1;
     const day = d.getDate();

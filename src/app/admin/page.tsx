@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type User = {
   id: number;
@@ -591,7 +592,13 @@ export default function AdminPage() {
           <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-4">
             {qrCodeUrl && (
               <div className="text-center">
-                <img src={qrCodeUrl} alt="QR Code" className="border-2 border-pink-200 rounded-lg max-w-full h-auto" style={{ maxWidth: '300px' }} />
+                <Image
+                  src={qrCodeUrl}
+                  alt="QR Code"
+                  width={300}
+                  height={300}
+                  className="border-2 border-pink-200 rounded-lg max-w-full h-auto"
+                />
                 <button
                   onClick={downloadQRCode}
                   className="mt-2 bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors font-serif"
