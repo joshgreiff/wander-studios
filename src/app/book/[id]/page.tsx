@@ -57,6 +57,18 @@ export default function BookClassPage() {
   const individualPrice = getCurrentIndividualClassPrice();
   const packagePrice = getPackagePrice();
 
+  const fetchAvailablePackages = useCallback(async (userId: number) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/available-packages`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailablePackages(data);
+      }
+    } catch (error) {
+      console.error('Error fetching available packages:', error);
+    }
+  }, []);
+
   const checkUserLogin = useCallback(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -64,7 +76,7 @@ export default function BookClassPage() {
       setUser(userObj);
       fetchAvailablePackages(userObj.id);
     }
-  }, [fetchAvailablePackages]);
+  }, []);
 
   const fetchClass = useCallback(async (classId: number) => {
     try {
@@ -82,18 +94,6 @@ export default function BookClassPage() {
       setLoading(false);
     }
   }, [router]);
-
-  const fetchAvailablePackages = useCallback(async (userId: number) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/available-packages`);
-      if (response.ok) {
-        const data = await response.json();
-        setAvailablePackages(data);
-      }
-    } catch (error) {
-      console.error('Error fetching available packages:', error);
-    }
-  }, []);
 
   useEffect(() => {
     if (params?.id) {
