@@ -2,10 +2,10 @@ import React from 'react';
 
 export default function Newsletter() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center justify-center p-4">
-      <section className="max-w-2xl w-full bg-white/90 rounded-xl shadow p-6 flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-4 text-orange-900 text-center">Join Our Wellness Community</h1>
-        <p className="mb-4 text-orange-800 text-center text-lg">Get class updates, wellness tips, and inspiration delivered to your inbox. No spam, just good vibes!</p>
+    <main className="min-h-screen bg-gradient-to-br from-pink-100 via-pink-200 to-pink-300 flex flex-col items-center justify-center p-4">
+      <section className="max-w-2xl w-full bg-pink-50/95 rounded-xl shadow p-6 flex flex-col items-center border border-pink-200">
+        <h1 className="text-3xl font-serif font-bold mb-4 text-brown-800 text-center">Join Our Wellness Community</h1>
+        <p className="mb-4 text-brown-700 text-center text-lg font-serif">Get class updates, wellness tips, and inspiration delivered to your inbox. No spam, just good vibes!</p>
         <div className="w-full max-w-md mx-auto">
           <div
             dangerouslySetInnerHTML={{ __html: `
@@ -14,7 +14,7 @@ export default function Newsletter() {
 #mlb2-27886150 .ml-form-embedContent { display: none !important; }
 #mlb2-27886150 .ml-form-successContent h4,
 #mlb2-27886150 .ml-form-successContent p {
-  color: #b45309 !important;
+  color: #846358 !important;
   font-weight: 600;
 }
 #mlb2-27886150 .ml-form-embedBody .ml-block-form {
@@ -39,9 +39,9 @@ export default function Newsletter() {
   margin: 0;
 }
 #mlb2-27886150 input.form-control {
-  color: #b45309 !important;
+  color: #846358 !important;
   background: #fff !important;
-  border: 1.5px solid #e5e7eb !important;
+  border: 1.5px solid #fce7f3 !important;
   border-radius: 0.5rem !important;
   padding: 0.75rem 1rem !important;
   font-size: 1rem !important;
@@ -52,15 +52,15 @@ export default function Newsletter() {
   transition: border 0.2s;
 }
 #mlb2-27886150 input.form-control:focus {
-  border-color: #f59e42 !important;
+  border-color: #ec4899 !important;
   outline: none;
 }
 #mlb2-27886150 input.form-control::placeholder {
-  color: #b45309 !important;
+  color: #846358 !important;
   opacity: 0.7;
 }
 #mlb2-27886150 button.primary {
-  background: #ea580c !important;
+  background: #ec4899 !important;
   color: #fff !important;
   font-weight: 700;
   border: none !important;
@@ -76,7 +76,7 @@ export default function Newsletter() {
   box-shadow: 0 1px 2px 0 rgb(16 24 40 / 5%);
 }
 #mlb2-27886150 button.primary:hover {
-  background: #c2410c !important;
+  background: #db2777 !important;
 }
 #mlb2-27886150 button.loading { display: none !important; }
 @media (max-width: 700px) {

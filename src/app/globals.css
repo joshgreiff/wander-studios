@@ -14,7 +14,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, #fed7aa 0%, #fb923c 50%, #ea580c 100%);
+  background: linear-gradient(135deg, #fef7f0 0%, #fde8d8 50%, #fbd5d5 100%);
   color: #1f2937;
   font-family: Arial, Helvetica, sans-serif;
   /* Safari-specific body styles */
@@ -28,27 +28,27 @@ body {
 /* Override dark mode for our site */
 @media (prefers-color-scheme: dark) {
   body {
-    background: linear-gradient(135deg, #fed7aa 0%, #fb923c 50%, #ea580c 100%);
+    background: linear-gradient(135deg, #fef7f0 0%, #fde8d8 50%, #fbd5d5 100%);
     color: #1f2937;
   }
 }
 
 /* Explicit fallback styles for main content areas */
 main {
-  background: linear-gradient(135deg, #fed7aa 0%, #fb923c 50%, #ea580c 100%);
+  background: linear-gradient(135deg, #fef7f0 0%, #fde8d8 50%, #fbd5d5 100%);
   min-height: 100vh;
   padding: 1rem;
 }
 
 /* Fix for Safari gradient rendering */
 .bg-gradient-to-br {
-  background-image: -webkit-linear-gradient(bottom right, #fed7aa 0%, #fb923c 50%, #ea580c 100%) !important;
-  background-image: linear-gradient(to bottom right, #fed7aa 0%, #fb923c 50%, #ea580c 100%) !important;
+  background-image: -webkit-linear-gradient(bottom right, #fef7f0 0%, #fde8d8 50%, #fbd5d5 100%) !important;
+  background-image: linear-gradient(to bottom right, #fef7f0 0%, #fde8d8 50%, #fbd5d5 100%) !important;
   }
 
 .bg-gradient-to-r {
-  background-image: -webkit-linear-gradient(right, #fb923c 0%, #ea580c 50%, #dc2626 100%) !important;
-  background-image: linear-gradient(to right, #fb923c 0%, #ea580c 50%, #dc2626 100%) !important;
+  background-image: -webkit-linear-gradient(right, #fecaca 0%, #fca5a5 50%, #f87171 100%) !important;
+  background-image: linear-gradient(to right, #fecaca 0%, #fca5a5 50%, #f87171 100%) !important;
 }
 
 /* Fix for Safari flexbox issues */
@@ -73,14 +73,14 @@ p {
   color: #374151;
 }
 
-/* Ensure white text on orange backgrounds */
+/* Ensure white text on pink backgrounds */
 .text-white {
   color: #ffffff;
 }
 
-/* Ensure orange text */
-.text-orange-800, .text-orange-900 {
-  color: #92400e;
+/* Ensure brown text */
+.text-brown-800, .text-brown-900 {
+  color: #846358;
 }
 
 /* Ensure white backgrounds for cards */

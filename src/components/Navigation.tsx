@@ -39,17 +39,17 @@ export default function Navigation() {
       } else {
         setUser(null);
       }
-      };
+    };
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('userLogin', handleUserChange);
     window.addEventListener('userLogout', handleUserChange);
 
-      return () => {
+    return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('userLogin', handleUserChange);
       window.removeEventListener('userLogout', handleUserChange);
-      };
+    };
   }, []);
 
   const toggleMobileMenu = () => {
@@ -70,12 +70,14 @@ export default function Navigation() {
   };
 
   return (
-    <header className="w-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-400 shadow-md relative">
+    <header className="w-full bg-gradient-to-r from-warm-200 via-warm-300 to-warm-400 shadow-md relative">
       <nav className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
-        <Link href="/" className="text-2xl font-bold text-white tracking-tight">Wander Movement</Link>
+        <Link href="/" className="text-2xl font-serif font-bold text-white tracking-tight">
+          Wander Movement
+        </Link>
         
         {/* Desktop Navigation - Show on medium screens and larger */}
-        <ul className="hidden md:flex gap-4 text-white font-semibold text-lg">
+        <ul className="hidden md:flex gap-4 text-white font-serif font-semibold text-lg">
           <li><Link href="/classes" className="hover:underline">Classes</Link></li>
           <li><Link href="/about" className="hover:underline">About</Link></li>
           <li><Link href="/contact" className="hover:underline">Contact</Link></li>
@@ -86,15 +88,15 @@ export default function Navigation() {
               <li><Link href="/packages" className="hover:underline">Packages</Link></li>
               <li><Link href="/dashboard" className="hover:underline">Dashboard</Link></li>
               {user.isAdmin && (
-            <li>
-              <Link 
-                href="/admin" 
-                className="hover:underline bg-white/20 px-2 py-1 rounded text-sm"
-                title="Admin Dashboard"
-              >
-                Admin
-              </Link>
-            </li>
+                <li>
+                  <Link 
+                    href="/admin" 
+                    className="hover:underline bg-white/20 px-2 py-1 rounded text-sm"
+                    title="Admin Dashboard"
+                  >
+                    Admin
+                  </Link>
+                </li>
               )}
               <li>
                 <button onClick={handleLogout} className="hover:underline">
@@ -108,7 +110,7 @@ export default function Navigation() {
         </ul>
 
         {/* Mobile Hamburger Button - Only show on small screens */}
-        <button
+        <button 
           onClick={toggleMobileMenu}
           className="md:hidden flex justify-center items-center w-8 h-8 text-white hamburger-button"
           aria-label="Toggle mobile menu"
@@ -129,43 +131,43 @@ export default function Navigation() {
           )}
         </button>
       </nav>
-
+      
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-orange-500 shadow-lg z-50">
-          <ul className="text-white font-semibold text-lg px-4 pb-4 space-y-2">
-            <li><Link href="/classes" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Classes</Link></li>
-            <li><Link href="/about" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">About</Link></li>
-            <li><Link href="/contact" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Contact</Link></li>
-            <li><Link href="/waiver" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Waiver</Link></li>
+        <div className="md:hidden absolute top-full left-0 right-0 bg-warm-300 shadow-lg z-50">
+          <ul className="text-white font-serif font-semibold text-lg px-4 pb-4 space-y-2">
+            <li><Link href="/classes" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Classes</Link></li>
+            <li><Link href="/about" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">About</Link></li>
+            <li><Link href="/contact" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Contact</Link></li>
+            <li><Link href="/waiver" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Waiver</Link></li>
             
             {user ? (
               <>
-                <li><Link href="/packages" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Packages</Link></li>
-                <li><Link href="/dashboard" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Dashboard</Link></li>
+                <li><Link href="/packages" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Packages</Link></li>
+                <li><Link href="/dashboard" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Dashboard</Link></li>
                 {user.isAdmin && (
-              <li>
-                <Link 
-                  href="/admin" 
-                  onClick={closeMobileMenu}
-                  className="block py-2 hover:bg-orange-600 rounded px-2 bg-white/20"
-                  title="Admin Dashboard"
-                >
-                  Admin
-                </Link>
-              </li>
+                  <li>
+                    <Link 
+                      href="/admin" 
+                      onClick={closeMobileMenu}
+                      className="block py-2 hover:bg-warm-400 rounded px-2 bg-white/20"
+                      title="Admin Dashboard"
+                    >
+                      Admin
+                    </Link>
+                  </li>
                 )}
                 <li>
                   <button 
                     onClick={handleLogout}
-                    className="block w-full text-left py-2 hover:bg-orange-600 rounded px-2"
+                    className="block w-full text-left py-2 hover:bg-warm-400 rounded px-2"
                   >
                     Logout
                   </button>
                 </li>
               </>
             ) : (
-              <li><Link href="/login" onClick={closeMobileMenu} className="block py-2 hover:bg-orange-600 rounded px-2">Login</Link></li>
+              <li><Link href="/login" onClick={closeMobileMenu} className="block py-2 hover:bg-warm-400 rounded px-2">Login</Link></li>
             )}
           </ul>
         </div>

@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
+import Link from 'next/link';
 
 type Class = {
   id: number;
@@ -19,9 +21,15 @@ type Class = {
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     fetch('/api/classes')
       .then(res => res.json())
       .then(data => {
@@ -30,42 +38,98 @@ export default function ClassesPage() {
       });
   }, []);
 
+  const formatDateTime = (date: string, time: string) => {
+    const d = new Date(date);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const hours = d.getHours();
+    const minutes = d.getMinutes();
+    return `${month}/${day} ${hours}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-      <section className="max-w-2xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-6 text-orange-900 text-center">Upcoming Classes</h1>
+    <main className="min-h-screen bg-gradient-to-br from-warm-50 via-warm-100 to-warm-200 flex flex-col items-center p-4">
+      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 flex flex-col items-center border border-warm-200">
+        <h1 className="text-3xl font-serif font-bold mb-6 text-brown-800 text-center">Upcoming Classes</h1>
         {loading ? (
-          <div className="text-orange-700">Loading...</div>
+          <div className="text-brown-700 font-serif">Loading...</div>
         ) : classes.length === 0 ? (
-          <div className="text-orange-700">No classes scheduled yet.</div>
+          <div className="text-brown-700 font-serif">No classes scheduled yet.</div>
         ) : (
           <ul className="w-full flex flex-col gap-4">
-            {classes.map(c => (
-              <li key={c.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 shadow">
-                <div>
-                  <div className="font-semibold text-orange-900 text-lg">{c.date?.slice(0, 10)} {c.time}</div>
-                  <div className="text-orange-800">{c.description}</div>
-                  {c.address && <div className="text-orange-700 text-sm">📍 {c.address}</div>}
-                  <div className="text-orange-700 text-sm">
-                    📊 {c.bookings?.length || 0} / {c.capacity} spots filled
-                    {c.bookings && c.bookings.length >= c.capacity && (
-                      <span className="text-red-600 font-semibold ml-2">• FULL</span>
+            {classes.map(c => {
+              const currentBookings = c.bookings?.length || 0;
+              const availableSpots = c.capacity - currentBookings;
+              const isFull = availableSpots <= 0;
+              
+              return (
+                <li key={c.id} className="border border-warm-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-warm-50/80 shadow">
+                  <div className="flex-1">
+                    <div className="font-serif font-semibold text-brown-800 text-lg">{formatDateTime(c.date, c.time)}</div>
+                    <div className="text-brown-700 font-serif">{c.description}</div>
+                    <div className="text-brown-600 text-sm font-serif">
+                      {isFull ? (
+                        <span className="text-red-600 font-serif font-semibold">Class Full ({c.capacity}/{c.capacity})</span>
+                      ) : (
+                        <span>Available Spots: {availableSpots}/{c.capacity}</span>
+                      )}
+                    </div>
+                    
+                    {/* Calendar Integration for Logged-in Users */}
+                    {user && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          onClick={() => {
+                            const event = createClassCalendarEvent(
+                              c.description,
+                              c.date,
+                              c.time,
+                              60,
+                              c.address,
+                              `Join us for ${c.description} at Wander Movement!`
+                            );
+                            const icalContent = generateICalEvent(event);
+                            downloadCalendarFile(icalContent, `wander-movement-${c.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                        >
+                          <span>📱</span>
+                          <span>Apple</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const event = createClassCalendarEvent(
+                              c.description,
+                              c.date,
+                              c.time,
+                              60,
+                              c.address,
+                              `Join us for ${c.description} at Wander Movement!`
+                            );
+                            const googleUrl = generateGoogleCalendarUrl(event);
+                            window.open(googleUrl, '_blank');
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                        >
+                          <span>📅</span>
+                          <span>Google</span>
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-                <button 
-                  onClick={() => router.push(`/book/${c.id}`)}
-                  disabled={c.bookings && c.bookings.length >= c.capacity}
-                  className={`mt-4 sm:mt-0 font-semibold py-2 px-6 rounded transition ${
-                    c.bookings && c.bookings.length >= c.capacity
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-orange-600 text-white hover:bg-orange-700'
-                  }`}
-                >
-                  {c.bookings && c.bookings.length >= c.capacity ? 'Full' : 'Book'}
-                </button>
-              </li>
-            ))}
+                  <Link
+                    href={`/book/${c.id}`}
+                    className={`mt-4 sm:mt-0 font-serif font-semibold py-2 px-6 rounded transition text-center ${
+                      isFull 
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                        : 'bg-warm-400 text-white hover:bg-warm-500'
+                    }`}
+                  >
+                    {isFull ? 'Full' : 'Book'}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

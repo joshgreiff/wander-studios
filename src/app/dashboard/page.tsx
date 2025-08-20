@@ -173,8 +173,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="text-orange-600">Loading...</div>
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center">
+        <div className="text-brown-700 font-serif">Loading...</div>
       </div>
     );
   }
@@ -184,18 +184,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-pink-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-orange-900">Welcome, {user.name}!</h1>
-              <p className="text-orange-600">{user.email}</p>
+              <h1 className="text-2xl font-serif font-bold text-brown-800">Welcome, {user.name}!</h1>
+              <p className="text-brown-600 font-serif">{user.email}</p>
             </div>
             <Link
               href="/packages"
-              className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+              className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors font-serif"
             >
               Buy Class Package
             </Link>
@@ -203,12 +203,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Password Change Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-orange-800">Account Settings</h2>
+            <h2 className="text-xl font-serif font-semibold text-brown-700">Account Settings</h2>
             <button
               onClick={() => setShowPasswordChange(!showPasswordChange)}
-              className="text-orange-600 hover:text-orange-800 transition-colors"
+              className="text-brown-600 hover:text-brown-800 transition-colors font-serif"
             >
               {showPasswordChange ? 'Cancel' : 'Change Password'}
             </button>
@@ -216,49 +216,49 @@ export default function DashboardPage() {
           {showPasswordChange && (
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-orange-700 mb-1">
+                <label className="block text-sm font-serif font-medium text-brown-700 mb-1">
                   Current Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                  className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-pink-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 font-serif"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-orange-700 mb-1">
+                <label className="block text-sm font-serif font-medium text-brown-700 mb-1">
                   New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                  className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-pink-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 font-serif"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-orange-700 mb-1">
+                <label className="block text-sm font-serif font-medium text-brown-700 mb-1">
                   Confirm New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                  className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-pink-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 font-serif"
                   required
                 />
               </div>
               {passwordMessage && (
-                <p className={`text-sm ${passwordMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-sm font-serif ${passwordMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
                   {passwordMessage}
                 </p>
               )}
               <button
                 type="submit"
-                className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors font-serif"
               >
                 Update Password
               </button>
@@ -268,39 +268,39 @@ export default function DashboardPage() {
 
         {/* Package Bookings */}
         {packageBookings.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold text-orange-800 mb-4">Your Class Packages</h2>
+          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
+            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Your Class Packages</h2>
             <div className="space-y-4">
               {packageBookings.map((packageBooking) => (
-                <div key={packageBooking.id} className="border border-orange-200 rounded-lg p-4">
+                <div key={packageBooking.id} className="border border-pink-200 rounded-lg p-4 bg-white/50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-orange-900">{packageBooking.package.name}</h3>
-                      <p className="text-sm text-orange-600">{packageBooking.package.description}</p>
+                      <h3 className="font-serif font-semibold text-brown-800">{packageBooking.package.name}</h3>
+                      <p className="text-sm text-brown-600 font-serif">{packageBooking.package.description}</p>
                       <div className="mt-2 space-y-1">
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           💰 Paid: ${packageBooking.package.price}
                         </p>
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           📅 Expires: {formatDate(packageBooking.expiresAt)}
                         </p>
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           🎯 Remaining classes: {getRemainingClasses(packageBooking)}/{packageBooking.package.classCount}
                         </p>
                         {packageBooking.redeemed && packageBooking.class && (
-                          <p className="text-sm text-green-600">
+                          <p className="text-sm text-green-600 font-serif">
                             ✅ Used for: {packageBooking.class.description} on {formatDate(packageBooking.class.date)}
                           </p>
                         )}
                         {isPackageExpired(packageBooking.expiresAt) && (
-                          <p className="text-sm text-red-600 font-semibold">
+                          <p className="text-sm text-red-600 font-serif font-semibold">
                             ⚠️ Package expired
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      <span className={`px-2 py-1 rounded text-xs font-serif font-semibold ${
                         packageBooking.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>
                         {packageBooking.paid ? 'Paid' : 'Pending'}
@@ -315,37 +315,37 @@ export default function DashboardPage() {
 
         {/* Individual Class Bookings */}
         {bookings.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-orange-800 mb-4">Your Class Bookings</h2>
+          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 border border-pink-200">
+            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Your Class Bookings</h2>
             <div className="space-y-4">
               {bookings.map((booking) => (
-                <div key={booking.id} className="border border-orange-200 rounded-lg p-4">
+                <div key={booking.id} className="border border-pink-200 rounded-lg p-4 bg-white/50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-orange-900">{booking.class.description}</h3>
+                      <h3 className="font-serif font-semibold text-brown-800">{booking.class.description}</h3>
                       <div className="mt-2 space-y-1">
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           📅 {formatDate(booking.class.date)} at {formatTime(booking.class.time)}
                         </p>
                         {booking.class.address && (
-                          <p className="text-sm text-orange-600">
+                          <p className="text-sm text-brown-600 font-serif">
                             📍 {booking.class.address}
                           </p>
                         )}
                         {booking.class.isVirtual && booking.class.virtualLink && (
-                          <p className="text-sm text-blue-600">
+                          <p className="text-sm text-blue-600 font-serif">
                             🔗 <a href={booking.class.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
                               Join Virtual Class
                             </a>
                           </p>
                         )}
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           📧 {booking.email}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      <span className={`px-2 py-1 rounded text-xs font-serif font-semibold ${
                         booking.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>
                         {booking.paid ? 'Paid' : 'Pending'}
@@ -360,19 +360,19 @@ export default function DashboardPage() {
 
         {/* No Bookings Message */}
         {bookings.length === 0 && packageBookings.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <h2 className="text-xl font-semibold text-orange-800 mb-4">No Bookings Yet</h2>
-            <p className="text-orange-600 mb-4">You haven&apos;t booked any classes yet.</p>
+          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 text-center border border-pink-200">
+            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">No Bookings Yet</h2>
+            <p className="text-brown-600 mb-4 font-serif">You haven&apos;t booked any classes yet.</p>
             <div className="space-x-4">
               <Link
                 href="/classes"
-                className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors font-serif"
               >
                 Browse Classes
               </Link>
               <Link
                 href="/packages"
-                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors"
+                className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition-colors font-serif"
               >
                 Buy Package
               </Link>

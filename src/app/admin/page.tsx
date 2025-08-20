@@ -551,10 +551,10 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
-        <section className="bg-white/90 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center">
-          <h1 className="text-2xl font-bold mb-4 text-orange-900">Loading...</h1>
-          <p className="text-gray-600">Checking admin access...</p>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-100 via-pink-200 to-pink-300 p-4">
+        <section className="bg-pink-50/95 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center border border-pink-200">
+          <h1 className="text-2xl font-serif font-bold mb-4 text-brown-800">Loading...</h1>
+          <p className="text-gray-600 font-serif">Checking admin access...</p>
         </section>
       </main>
     );
@@ -562,15 +562,15 @@ export default function AdminPage() {
 
   if (!authenticated || !user?.isAdmin) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
-        <section className="bg-white/90 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center">
-          <h1 className="text-2xl font-bold mb-4 text-orange-900">Access Denied</h1>
-          <p className="text-gray-600 text-center mb-4">
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-100 via-pink-200 to-pink-300 p-4">
+        <section className="bg-pink-50/95 rounded-xl shadow p-8 max-w-sm w-full flex flex-col items-center border border-pink-200">
+          <h1 className="text-2xl font-serif font-bold mb-4 text-brown-800">Access Denied</h1>
+          <p className="text-gray-600 text-center mb-4 font-serif">
             You need admin privileges to access this page.
           </p>
           <button 
             onClick={() => router.push('/')}
-            className="bg-orange-600 text-white font-semibold py-2 px-4 rounded hover:bg-orange-700"
+            className="bg-pink-600 text-white font-serif font-semibold py-2 px-4 rounded hover:bg-pink-700"
           >
             Go Home
           </button>
@@ -580,27 +580,27 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 p-4">
-      <section className="bg-white/90 rounded-xl shadow p-8 max-w-4xl w-full flex flex-col items-center">
-        <h1 className="text-2xl font-bold mb-4 text-orange-900">Admin Dashboard</h1>
-        <button onClick={handleLogout} className="mb-4 self-end text-orange-700 hover:underline">Log out</button>
+    <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-pink-100 via-pink-200 to-pink-300 p-4">
+      <section className="bg-pink-50/95 rounded-xl shadow p-8 max-w-4xl w-full flex flex-col items-center border border-pink-200">
+        <h1 className="text-2xl font-serif font-bold mb-4 text-brown-800">Admin Dashboard</h1>
+        <button onClick={handleLogout} className="mb-4 self-end text-brown-700 hover:underline font-serif">Log out</button>
         
         {/* QR Code Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-orange-800 mb-4">QR Code for Flyers</h2>
-          <div className="flex items-center space-x-4">
+          <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">QR Code for Flyers</h2>
+          <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-4">
             {qrCodeUrl && (
               <div className="text-center">
-                <img src={qrCodeUrl} alt="QR Code" className="border-2 border-orange-200 rounded-lg" />
+                <img src={qrCodeUrl} alt="QR Code" className="border-2 border-pink-200 rounded-lg max-w-full h-auto" style={{ maxWidth: '300px' }} />
                 <button
                   onClick={downloadQRCode}
-                  className="mt-2 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                  className="mt-2 bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors font-serif"
                 >
                   Download QR Code
                 </button>
               </div>
             )}
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 font-serif lg:flex-1">
               <p><strong>Website URL:</strong> {typeof window !== 'undefined' ? window.location.origin + '/book' : ''}</p>
               <p className="mt-2">This QR code links directly to the class booking page. Perfect for flyers, business cards, and marketing materials.</p>
             </div>
@@ -608,12 +608,12 @@ export default function AdminPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-6 w-full">
+        <div className="flex flex-wrap gap-2 mb-6 w-full">
           <button
             onClick={() => setActiveTab('classes')}
-            className={`px-4 py-2 rounded-lg font-semibold transition ${
+            className={`px-3 py-2 rounded-lg font-serif font-semibold transition text-sm ${
               activeTab === 'classes' 
-                ? 'bg-orange-600 text-white' 
+                ? 'bg-pink-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -621,9 +621,9 @@ export default function AdminPage() {
           </button>
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-4 py-2 rounded-lg font-semibold transition ${
+            className={`px-3 py-2 rounded-lg font-serif font-semibold transition text-sm ${
               activeTab === 'bookings' 
-                ? 'bg-orange-600 text-white' 
+                ? 'bg-pink-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -631,9 +631,9 @@ export default function AdminPage() {
           </button>
           <button
             onClick={() => setActiveTab('waivers')}
-            className={`px-4 py-2 rounded-lg font-semibold transition ${
+            className={`px-3 py-2 rounded-lg font-serif font-semibold transition text-sm ${
               activeTab === 'waivers' 
-                ? 'bg-orange-600 text-white' 
+                ? 'bg-pink-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -641,71 +641,70 @@ export default function AdminPage() {
           </button>
           <button
             onClick={() => setActiveTab('revenue')}
-            className={`px-4 py-2 rounded-lg font-semibold transition ${
+            className={`px-3 py-2 rounded-lg font-serif font-semibold transition text-sm ${
               activeTab === 'revenue' 
-                ? 'bg-orange-600 text-white' 
+                ? 'bg-pink-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             Revenue Dashboard
           </button>
-
         </div>
 
         {activeTab === 'classes' && (
           <>
             <form onSubmit={handleAddClass} className="flex flex-col gap-2 w-full mb-6">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="flex flex-col flex-1">
-                  <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="date">Date</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="date">Date</label>
                   <input type="date" id="date" name="date" value={form.date} onChange={handleChange} className="border rounded px-2 py-1 flex-1" required />
                 </div>
                 <div className="flex flex-col flex-1">
-                  <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="time">Time</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="time">Time</label>
                   <input type="time" id="time" name="time" value={form.time} onChange={handleChange} className="border rounded px-2 py-1 flex-1" required />
                 </div>
-                <div className="flex flex-col w-20">
-                  <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="capacity">Capacity</label>
-                  <input type="number" id="capacity" name="capacity" value={form.capacity} onChange={handleChange} className="border rounded px-2 py-1 w-20" min={1} required />
+                <div className="flex flex-col sm:w-20">
+                  <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="capacity">Capacity</label>
+                  <input type="number" id="capacity" name="capacity" value={form.capacity} onChange={handleChange} className="border rounded px-2 py-1 sm:w-20" min={1} required />
                 </div>
               </div>
               <div className="flex flex-col">
-                <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="description">Description</label>
+                <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="description">Description</label>
                 <textarea id="description" name="description" value={form.description} onChange={handleChange} className="border rounded px-2 py-1" placeholder="Class description" required />
               </div>
               <div className="flex flex-col">
-                <label className="text-sm font-bold text-orange-700 mb-1" htmlFor="address">Address (optional)</label>
+                <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="address">Address (optional)</label>
                 <input type="text" id="address" name="address" value={form.address} onChange={handleChange} className="border rounded px-2 py-1" placeholder="Class location address" />
               </div>
-              <button type="submit" className="bg-orange-600 text-white font-semibold py-2 rounded hover:bg-orange-700" disabled={loading}>{loading ? 'Saving...' : 'Add Class'}</button>
+              <button type="submit" className="bg-pink-600 text-white font-semibold py-2 rounded hover:bg-pink-700" disabled={loading}>{loading ? 'Saving...' : 'Add Class'}</button>
             </form>
-            {loading && <div className="text-orange-700 mb-2">Loading...</div>}
+            {loading && <div className="text-pink-700 mb-2">Loading...</div>}
             <ul className="w-full">
               {classes.map(c => (
                 <li key={c.id} className="border-b py-2">
                   {editingId === c.id ? (
                     // Edit form
                     <form onSubmit={handleEditSubmit} className="flex flex-col gap-2">
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <div className="flex flex-col flex-1">
-                          <label className="text-sm font-bold text-orange-700 mb-1">Date</label>
+                          <label className="text-sm font-bold text-brown-700 mb-1">Date</label>
                           <input type="date" name="date" value={editForm.date} onChange={handleEditChange} className="border rounded px-2 py-1 flex-1" required />
                         </div>
                         <div className="flex flex-col flex-1">
-                          <label className="text-sm font-bold text-orange-700 mb-1">Time</label>
+                          <label className="text-sm font-bold text-brown-700 mb-1">Time</label>
                           <input type="time" name="time" value={editForm.time} onChange={handleEditChange} className="border rounded px-2 py-1 flex-1" required />
                         </div>
-                        <div className="flex flex-col w-20">
-                          <label className="text-sm font-bold text-orange-700 mb-1">Capacity</label>
-                          <input type="number" name="capacity" value={editForm.capacity} onChange={handleEditChange} className="border rounded px-2 py-1 w-20" min={1} required />
+                        <div className="flex flex-col sm:w-20">
+                          <label className="text-sm font-bold text-brown-700 mb-1">Capacity</label>
+                          <input type="number" name="capacity" value={editForm.capacity} onChange={handleEditChange} className="border rounded px-2 py-1 sm:w-20" min={1} required />
                         </div>
                       </div>
                       <div className="flex flex-col">
-                        <label className="text-sm font-bold text-orange-700 mb-1">Description</label>
+                        <label className="text-sm font-bold text-brown-700 mb-1">Description</label>
                         <textarea name="description" value={editForm.description} onChange={handleEditChange} className="border rounded px-2 py-1" placeholder="Class description" required />
                       </div>
                       <div className="flex flex-col">
-                        <label className="text-sm font-bold text-orange-700 mb-1">Address (optional)</label>
+                        <label className="text-sm font-bold text-brown-700 mb-1">Address (optional)</label>
                         <input type="text" name="address" value={editForm.address} onChange={handleEditChange} className="border rounded px-2 py-1" placeholder="Class location address" />
                       </div>
                       <div className="flex gap-2">
@@ -719,12 +718,12 @@ export default function AdminPage() {
                     </form>
                   ) : (
                     // Display mode
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-semibold text-orange-900">{c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})</span>
-                        {c.address && <div className="text-sm text-orange-700 mt-1">📍 {c.address}</div>}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <span className="font-semibold text-brown-900">{c.date?.slice(0, 10)} {c.time} — {c.description} (Capacity: {c.capacity})</span>
+                        {c.address && <div className="text-sm text-brown-700 mt-1">📍 {c.address}</div>}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <button onClick={() => viewClassDetails(c)} className="text-green-600 hover:underline text-sm">View Details</button>
                         <button onClick={() => startEdit(c)} className="text-blue-600 hover:underline text-sm">Edit</button>
                         <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:underline text-sm">Delete</button>
@@ -739,7 +738,7 @@ export default function AdminPage() {
 
         {activeTab === 'bookings' && (
           <div className="w-full">
-            <h2 className="text-xl font-bold mb-4 text-orange-900">Manage Bookings</h2>
+            <h2 className="text-xl font-bold mb-4 text-brown-900">Manage Bookings</h2>
             
             {/* Bulk Import Section */}
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -776,7 +775,7 @@ export default function AdminPage() {
                   {/* Import Method Selection */}
                   <div>
                     <label className="text-sm font-bold text-blue-700 mb-2">Import Method</label>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <label className="flex items-center">
                         <input
                           type="radio"
@@ -886,11 +885,11 @@ export default function AdminPage() {
             </div>
             
             {/* Add Booking Form */}
-            <form onSubmit={handleAddBooking} className="bg-orange-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-orange-900 mb-3">Add Manual Booking (for existing customers)</h3>
+            <form onSubmit={handleAddBooking} className="bg-pink-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-brown-900 mb-3">Add Manual Booking (for existing customers)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-bold text-orange-700 mb-1">Class</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1">Class</label>
                   <select 
                     name="classId" 
                     value={bookingForm.classId} 
@@ -907,7 +906,7 @@ export default function AdminPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-orange-700 mb-1">Name</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1">Name</label>
                   <input 
                     type="text" 
                     name="name" 
@@ -918,7 +917,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-orange-700 mb-1">Email</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1">Email</label>
                   <input 
                     type="email" 
                     name="email" 
@@ -929,7 +928,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-orange-700 mb-1">Phone (optional)</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1">Phone (optional)</label>
                   <input 
                     type="tel" 
                     name="phone" 
@@ -939,7 +938,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-orange-700 mb-1">Waiver Signature</label>
+                  <label className="text-sm font-bold text-brown-700 mb-1">Waiver Signature</label>
                   <input 
                     type="text" 
                     name="waiverName" 
@@ -959,22 +958,22 @@ export default function AdminPage() {
                       onChange={handleBookingChange}
                       className="mr-2" 
                     />
-                    <span className="text-sm font-bold text-orange-700">Waiver Agreed</span>
+                    <span className="text-sm font-bold text-brown-700">Waiver Agreed</span>
                   </label>
                 </div>
               </div>
               <button 
                 type="submit" 
-                className="bg-orange-600 text-white font-semibold py-2 px-4 rounded hover:bg-orange-700 mt-3"
+                className="bg-pink-600 text-white font-semibold py-2 px-4 rounded hover:bg-pink-700 mt-3"
               >
                 Add Booking
               </button>
             </form>
 
             {/* Bookings List */}
-            <h3 className="font-semibold text-orange-900 mb-3">Bookings by Class</h3>
+            <h3 className="font-semibold text-brown-900 mb-3">Bookings by Class</h3>
             {bookings.length === 0 ? (
-              <p className="text-orange-700">No bookings yet.</p>
+              <p className="text-brown-700">No bookings yet.</p>
             ) : (
               <div className="space-y-6">
                 {(() => {
@@ -1011,12 +1010,12 @@ export default function AdminPage() {
 
                   return sortedClasses.map((classGroup, index) => (
                     <div key={index} className="border rounded-lg p-4 bg-white">
-                      <div className="mb-3 pb-2 border-b border-orange-200">
-                        <h4 className="font-bold text-lg text-orange-900">
+                      <div className="mb-3 pb-2 border-b border-brown-200">
+                        <h4 className="font-bold text-lg text-brown-900">
                           {classGroup.class ? (
                             <>
                               {new Date(classGroup.class.date).toLocaleDateString()} at {classGroup.class.time}
-                              <span className="text-sm font-normal text-orange-700 ml-2">
+                              <span className="text-sm font-normal text-brown-700 ml-2">
                                 — {classGroup.class.description}
                               </span>
                             </>
@@ -1024,7 +1023,7 @@ export default function AdminPage() {
                             'Unknown Class'
                           )}
                         </h4>
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600">
                           {classGroup.bookings.length} booking{classGroup.bookings.length !== 1 ? 's' : ''}
                           {classGroup.class && (
                             <span className="ml-2">
@@ -1039,11 +1038,11 @@ export default function AdminPage() {
                       
                       <div className="space-y-2">
                         {classGroup.bookings.map(booking => (
-                          <div key={booking.id} className="flex justify-between items-center p-2 bg-orange-50 rounded border border-orange-100">
+                          <div key={booking.id} className="flex justify-between items-center p-2 bg-pink-50 rounded border border-pink-100">
                             <div>
-                              <h5 className="font-semibold text-orange-900">{booking.name}</h5>
-                              <p className="text-sm text-orange-700">{booking.email}</p>
-                              {booking.phone && <p className="text-sm text-orange-700">{booking.phone}</p>}
+                              <h5 className="font-semibold text-brown-900">{booking.name}</h5>
+                              <p className="text-sm text-brown-700">{booking.email}</p>
+                              {booking.phone && <p className="text-sm text-brown-700">{booking.phone}</p>}
                             </div>
                             <div className="text-right">
                               <span className={`text-xs px-2 py-1 rounded ${
@@ -1068,37 +1067,37 @@ export default function AdminPage() {
 
         {activeTab === 'waivers' && (
           <div className="w-full">
-            <h2 className="text-xl font-bold mb-4 text-orange-900">Submitted Waivers</h2>
+            <h2 className="text-xl font-bold mb-4 text-brown-900">Submitted Waivers</h2>
             {waivers.length === 0 ? (
-              <p className="text-orange-700">No waivers submitted yet.</p>
+              <p className="text-brown-700">No waivers submitted yet.</p>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {waivers.map(waiver => (
-                  <div key={waiver.id} className="border rounded-lg p-4 bg-orange-50">
+                  <div key={waiver.id} className="border rounded-lg p-4 bg-pink-50">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-orange-900">
+                      <h3 className="font-semibold text-brown-900">
                         {waiver.firstName} {waiver.lastName}
                       </h3>
-                      <span className="text-sm text-orange-700">
+                      <span className="text-sm text-brown-700">
                         {new Date(waiver.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-800">
-                      <div><strong className="text-orange-800">Email:</strong> {waiver.email}</div>
-                      {waiver.phone && <div><strong className="text-orange-800">Phone:</strong> {waiver.phone}</div>}
-                      <div><strong className="text-orange-800">Emergency Contact:</strong> {waiver.emergencyContact}</div>
-                      <div><strong className="text-orange-800">Emergency Phone:</strong> {waiver.emergencyPhone}</div>
+                      <div><strong className="text-brown-800">Email:</strong> {waiver.email}</div>
+                      {waiver.phone && <div><strong className="text-brown-800">Phone:</strong> {waiver.phone}</div>}
+                      <div><strong className="text-brown-800">Emergency Contact:</strong> {waiver.emergencyContact}</div>
+                      <div><strong className="text-brown-800">Emergency Phone:</strong> {waiver.emergencyPhone}</div>
                       {waiver.healthConditions && (
-                        <div className="md:col-span-2"><strong className="text-orange-800">Health Conditions:</strong> {waiver.healthConditions}</div>
+                        <div className="md:col-span-2"><strong className="text-brown-800">Health Conditions:</strong> {waiver.healthConditions}</div>
                       )}
                       {waiver.injuries && (
-                        <div className="md:col-span-2"><strong className="text-orange-800">Injuries:</strong> {waiver.injuries}</div>
+                        <div className="md:col-span-2"><strong className="text-brown-800">Injuries:</strong> {waiver.injuries}</div>
                       )}
                       {waiver.medications && (
-                        <div className="md:col-span-2"><strong className="text-orange-800">Medications:</strong> {waiver.medications}</div>
+                        <div className="md:col-span-2"><strong className="text-brown-800">Medications:</strong> {waiver.medications}</div>
                       )}
                       {waiver.isPregnant && (
-                        <div><strong className="text-orange-800">Pregnant:</strong> Yes {waiver.pregnancyWeeks && `(${waiver.pregnancyWeeks} weeks)`}</div>
+                        <div><strong className="text-brown-800">Pregnant:</strong> Yes {waiver.pregnancyWeeks && `(${waiver.pregnancyWeeks} weeks)`}</div>
                       )}
                     </div>
                   </div>
@@ -1111,13 +1110,13 @@ export default function AdminPage() {
         {activeTab === 'revenue' && (
           <div className="w-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-orange-900">Revenue Dashboard</h2>
+              <h2 className="text-xl font-bold text-brown-900">Revenue Dashboard</h2>
               <button
                 onClick={() => {
                   fetchSquareRevenue();
                   fetchBookings();
                 }}
-                className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+                className="bg-pink-600 text-white px-3 py-1 rounded text-sm hover:bg-pink-700"
               >
                 Refresh Data
               </button>
@@ -1162,11 +1161,11 @@ export default function AdminPage() {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-orange-900">Class Details</h2>
-                    <p className="text-lg text-orange-800">
+                    <h2 className="text-2xl font-bold text-brown-900">Class Details</h2>
+                    <p className="text-lg text-brown-800">
                       {selectedClass.date?.slice(0, 10)} {selectedClass.time} — {selectedClass.description}
                     </p>
-                    <p className="text-sm text-orange-700">
+                    <p className="text-sm text-brown-700">
                       Capacity: {classBookings.length}/{selectedClass.capacity} ({selectedClass.capacity - classBookings.length} spots available)
                     </p>
                   </div>
@@ -1206,19 +1205,19 @@ export default function AdminPage() {
 
                 {/* Bookings List */}
                 <div>
-                  <h3 className="text-lg font-semibold text-orange-900 mb-3">Student Bookings</h3>
+                  <h3 className="text-lg font-semibold text-brown-900 mb-3">Student Bookings</h3>
                   {classBookings.length === 0 ? (
-                    <p className="text-orange-700">No bookings for this class yet.</p>
+                    <p className="text-brown-700">No bookings for this class yet.</p>
                   ) : (
                     <div className="space-y-3">
                       {classBookings.map(booking => (
-                        <div key={booking.id} className="border rounded-lg p-4 bg-orange-50">
+                        <div key={booking.id} className="border rounded-lg p-4 bg-pink-50">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h4 className="font-semibold text-orange-900 text-lg">{booking.name}</h4>
-                              <p className="text-orange-700">{booking.email}</p>
-                              {booking.phone && <p className="text-orange-700">{booking.phone}</p>}
-                              <p className="text-sm text-orange-600">
+                              <h4 className="font-semibold text-brown-900 text-lg">{booking.name}</h4>
+                              <p className="text-brown-700">{booking.email}</p>
+                              {booking.phone && <p className="text-brown-700">{booking.phone}</p>}
+                              <p className="text-sm text-brown-600">
                                 Booked: {new Date(booking.createdAt).toLocaleDateString()}
                               </p>
                             </div>
@@ -1258,10 +1257,10 @@ export default function AdminPage() {
 
         <style jsx global>{`
           input, textarea {
-            color: #b45309 !important;
+            color: #846358 !important;
           }
           input::placeholder, textarea::placeholder {
-            color: #f59e42 !important;
+            color: #ec4899 !important;
             opacity: 1;
           }
         `}</style>

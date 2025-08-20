@@ -99,8 +99,8 @@ export default function PackagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="text-orange-600">Loading...</div>
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center">
+        <div className="text-brown-700 font-serif">Loading...</div>
       </div>
     );
   }
@@ -115,18 +115,18 @@ export default function PackagesPage() {
   const savingsPercentage = getPackageSavingsPercentage();
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-pink-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-orange-900">Class Packages</h1>
-              <p className="text-orange-600">Welcome, {user.name}!</p>
+              <h1 className="text-2xl font-serif font-bold text-brown-800">Class Packages</h1>
+              <p className="text-brown-600 font-serif">Welcome, {user.name}!</p>
             </div>
             <Link
               href="/dashboard"
-              className="text-orange-600 hover:text-orange-800 transition-colors"
+              className="text-brown-600 hover:text-brown-800 transition-colors font-serif"
             >
               ← Back to Dashboard
             </Link>
@@ -134,22 +134,22 @@ export default function PackagesPage() {
         </div>
 
         {/* Pricing Comparison */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-orange-800 mb-4">Pricing Comparison</h2>
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
+          <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Pricing Comparison</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-orange-200 rounded-lg p-4">
-              <h3 className="font-semibold text-orange-900 mb-2">Individual Classes</h3>
-              <p className="text-2xl font-bold text-orange-600">{formatPrice(individualPrice)}</p>
-              <p className="text-sm text-orange-600">per class</p>
-              <p className="text-sm text-orange-500 mt-2">
+            <div className="border border-pink-200 rounded-lg p-4 bg-white/50">
+              <h3 className="font-serif font-semibold text-brown-800 mb-2">Individual Classes</h3>
+              <p className="text-2xl font-serif font-bold text-brown-600">{formatPrice(individualPrice)}</p>
+              <p className="text-sm text-brown-600 font-serif">per class</p>
+              <p className="text-sm text-brown-500 mt-2 font-serif">
                 {individualPrice === 10 ? 'Current price until August 31, 2025' : 'New price effective September 1, 2025'}
               </p>
             </div>
-            <div className="border-2 border-orange-400 rounded-lg p-4 bg-orange-50">
-              <h3 className="font-semibold text-orange-900 mb-2">4-Class Package</h3>
-              <p className="text-2xl font-bold text-orange-600">{formatPrice(packagePrice)}</p>
-              <p className="text-sm text-orange-600">for 4 classes</p>
-              <p className="text-sm text-green-600 font-semibold mt-2">
+            <div className="border-2 border-pink-400 rounded-lg p-4 bg-pink-100">
+              <h3 className="font-serif font-semibold text-brown-800 mb-2">4-Class Package</h3>
+              <p className="text-2xl font-serif font-bold text-brown-600">{formatPrice(packagePrice)}</p>
+              <p className="text-sm text-brown-600 font-serif">for 4 classes</p>
+              <p className="text-sm text-green-600 font-serif font-semibold mt-2">
                 Save {formatPrice(savings)} ({savingsPercentage}% off!)
               </p>
             </div>
@@ -157,44 +157,44 @@ export default function PackagesPage() {
         </div>
 
         {/* Available Packages */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-orange-800 mb-4">Available Packages</h2>
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 border border-pink-200">
+          <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Available Packages</h2>
           
           {packages.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-orange-600">No packages available at the moment.</p>
+              <p className="text-brown-600 font-serif">No packages available at the moment.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {packages.map((pkg) => (
-                <div key={pkg.id} className="border border-orange-200 rounded-lg p-6">
+                <div key={pkg.id} className="border border-pink-200 rounded-lg p-6 bg-white/50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-orange-900">{pkg.name}</h3>
-                      <p className="text-orange-700 mt-1">{pkg.description}</p>
+                      <h3 className="text-xl font-serif font-semibold text-brown-800">{pkg.name}</h3>
+                      <p className="text-brown-700 mt-1 font-serif">{pkg.description}</p>
                       <div className="mt-3 space-y-1">
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           📅 Expires in {pkg.expiresInDays} days
                         </p>
-                        <p className="text-sm text-orange-600">
+                        <p className="text-sm text-brown-600 font-serif">
                           💰 {formatPrice(pkg.price)} for {pkg.classCount} classes
                         </p>
-                        <p className="text-sm text-green-600 font-semibold">
+                        <p className="text-sm text-green-600 font-serif font-semibold">
                           💡 Save {formatPrice(savings)} compared to individual classes
                         </p>
-                        <p className="text-sm text-blue-600">
+                        <p className="text-sm text-blue-600 font-serif">
                           🎯 Lock in the $10/class rate with this package!
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-orange-600 mb-2">
+                      <p className="text-2xl font-serif font-bold text-brown-600 mb-2">
                         {formatPrice(pkg.price)}
                       </p>
                       <button
                         onClick={() => handlePurchasePackage(pkg.id)}
                         disabled={purchasingPackageId === pkg.id}
-                        className="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-700 transition-colors disabled:opacity-50"
+                        className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 transition-colors disabled:opacity-50 font-serif"
                       >
                         {purchasingPackageId === pkg.id ? 'Processing...' : 'Purchase Package'}
                       </button>
@@ -207,35 +207,35 @@ export default function PackagesPage() {
         </div>
 
         {/* Package Benefits */}
-        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-          <h2 className="text-xl font-semibold text-orange-800 mb-4">Package Benefits</h2>
+        <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mt-6 border border-pink-200">
+          <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Package Benefits</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start space-x-3">
               <div className="text-green-500 text-xl">💰</div>
               <div>
-                <h4 className="font-semibold text-orange-900">Save Money</h4>
-                <p className="text-sm text-orange-600">Get {savingsPercentage}% off compared to individual classes</p>
+                <h4 className="font-serif font-semibold text-brown-800">Save Money</h4>
+                <p className="text-sm text-brown-600 font-serif">Get {savingsPercentage}% off compared to individual classes</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="text-green-500 text-xl">🎯</div>
               <div>
-                <h4 className="font-semibold text-orange-900">Lock in $10 Rate</h4>
-                <p className="text-sm text-orange-600">Secure the current $10/class rate before prices increase</p>
+                <h4 className="font-serif font-semibold text-brown-800">Lock in $10 Rate</h4>
+                <p className="text-sm text-brown-600 font-serif">Secure the current $10/class rate before prices increase</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="text-green-500 text-xl">⏰</div>
               <div>
-                <h4 className="font-semibold text-orange-900">90-Day Expiration</h4>
-                <p className="text-sm text-orange-600">Use your classes within 3 months</p>
+                <h4 className="font-serif font-semibold text-brown-800">90-Day Expiration</h4>
+                <p className="text-sm text-brown-600 font-serif">Use your classes within 3 months</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="text-green-500 text-xl">📱</div>
               <div>
-                <h4 className="font-semibold text-orange-900">Easy Management</h4>
-                <p className="text-sm text-orange-600">Track your remaining classes in your dashboard</p>
+                <h4 className="font-serif font-semibold text-brown-800">Easy Management</h4>
+                <p className="text-sm text-brown-600 font-serif">Track your remaining classes in your dashboard</p>
               </div>
             </div>
           </div>

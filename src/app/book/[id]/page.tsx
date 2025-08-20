@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getCurrentIndividualClassPrice, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
+import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
 
 type User = {
@@ -203,33 +204,33 @@ export default function BookClassPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="text-orange-600">Loading...</div>
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
+        <div className="text-brown-600">Loading...</div>
       </div>
     );
   }
 
   if (!classItem) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="text-orange-600">Class not found</div>
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
+        <div className="text-brown-600">Class not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-warm-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-orange-900">Book Your Class</h1>
-              <p className="text-orange-600">Complete your booking below</p>
+              <h1 className="text-2xl font-bold text-brown-900">Book Your Class</h1>
+              <p className="text-brown-600">Complete your booking below</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-orange-600">{formatPrice(individualPrice)}</p>
-              <p className="text-sm text-orange-500">per class</p>
+              <p className="text-2xl font-bold text-brown-600">{formatPrice(individualPrice)}</p>
+              <p className="text-sm text-brown-500">per class</p>
             </div>
           </div>
         </div>
@@ -238,28 +239,28 @@ export default function BookClassPage() {
           {/* Class Details */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold text-orange-800 mb-4">Class Details</h2>
+              <h2 className="text-xl font-semibold text-brown-800 mb-4">Class Details</h2>
               <div className="space-y-3">
                 <div>
-                  <h3 className="font-semibold text-orange-900">{classItem.description}</h3>
+                  <h3 className="font-semibold text-brown-900">{classItem.description}</h3>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-orange-600">📅</span>
+                  <span className="text-brown-600">📅</span>
                   <span>{formatDate(classItem.date)}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-orange-600">⏰</span>
+                  <span className="text-brown-600">⏰</span>
                   <span>{formatTime(classItem.time)}</span>
                 </div>
                 {classItem.address && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-orange-600">📍</span>
+                    <span className="text-brown-600">📍</span>
                     <span>{classItem.address}</span>
                   </div>
                 )}
                 {classItem.isVirtual && classItem.virtualLink && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-orange-600">🔗</span>
+                    <span className="text-brown-600">🔗</span>
                     <span className="text-blue-600">
                       <a href={classItem.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
                         Virtual Class Link
@@ -269,11 +270,59 @@ export default function BookClassPage() {
                 )}
                 {classItem.minAttendance > 1 && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-orange-600">👥</span>
+                    <span className="text-brown-600">👥</span>
                     <span>Minimum {classItem.minAttendance} people required</span>
                   </div>
                 )}
               </div>
+              
+              {/* Calendar Integration for Logged-in Users */}
+              {user && (
+                <div className="mt-6 pt-4 border-t border-warm-200">
+                  <h3 className="text-lg font-semibold text-brown-800 mb-3">📅 Add to Calendar</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                        const event = createClassCalendarEvent(
+                          classItem.description,
+                          classItem.date,
+                          classItem.time,
+                          60, // 60 minutes duration
+                          classItem.address,
+                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`
+                        );
+                        const icalContent = generateICalEvent(event);
+                        downloadCalendarFile(icalContent, `wander-movement-${classItem.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center space-x-2"
+                    >
+                      <span>📱</span>
+                      <span>Apple Calendar</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const event = createClassCalendarEvent(
+                          classItem.description,
+                          classItem.date,
+                          classItem.time,
+                          60,
+                          classItem.address,
+                          `Join us for ${classItem.description} at Wander Movement!${classItem.isVirtual && classItem.virtualLink ? `\n\nVirtual Class Link: ${classItem.virtualLink}` : ''}`
+                        );
+                        const googleUrl = generateGoogleCalendarUrl(event);
+                        window.open(googleUrl, '_blank');
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center space-x-2"
+                    >
+                      <span>📅</span>
+                      <span>Google Calendar</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-brown-600 mt-2">
+                    Add this class to your calendar to get reminders and never miss a session!
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Waiver Reminder */}
@@ -297,13 +346,13 @@ export default function BookClassPage() {
             </div>
 
             {/* Package Promotion */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-orange-200">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-warm-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-orange-900 mb-2">
+                  <h3 className="text-lg font-semibold text-brown-900 mb-2">
                     💰 Lock in Current Pricing with Class Packages!
                   </h3>
-                  <p className="text-orange-700 mb-3">
+                  <p className="text-brown-700 mb-3">
                     Get {formatPrice(packagePrice)} for 4 classes 
                     <br />
                     <span className="font-semibold text-blue-600">
@@ -316,14 +365,14 @@ export default function BookClassPage() {
                   </p>
                   <Link
                     href="/packages"
-                    className="inline-block bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+                    className="inline-block bg-warm-400 text-white px-4 py-2 rounded hover:bg-warm-500 transition-colors"
                   >
                     View Packages
                   </Link>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-orange-600">{formatPrice(packagePrice)}</div>
-                  <div className="text-sm text-orange-600">for 4 classes</div>
+                  <div className="text-3xl font-bold text-brown-600">{formatPrice(packagePrice)}</div>
+                  <div className="text-sm text-brown-600">for 4 classes</div>
                   <div className="text-xs text-blue-600 font-semibold">Lock in current rate</div>
                 </div>
               </div>
@@ -331,7 +380,7 @@ export default function BookClassPage() {
                   
             {/* Package Redemption Section */}
             {user && availablePackages.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-orange-200">
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-warm-200">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Use Your Package</h2>
                 <p className="text-gray-700 mb-4">
                   You have available packages! Use one to book this class for free.
@@ -339,7 +388,7 @@ export default function BookClassPage() {
                 
                 <div className="space-y-3">
                   {availablePackages.map((pkg) => (
-                    <div key={pkg.id} className="flex items-center justify-between p-3 border border-orange-200 rounded-lg bg-orange-50">
+                    <div key={pkg.id} className="flex items-center justify-between p-3 border border-warm-200 rounded-lg bg-warm-50">
                       <div>
                         <h3 className="font-semibold text-gray-900">{pkg.package.name}</h3>
                         <p className="text-sm text-gray-600">
@@ -351,8 +400,8 @@ export default function BookClassPage() {
                         onClick={() => setSelectedPackageId(selectedPackageId === pkg.id ? null : pkg.id)}
                         className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
                           selectedPackageId === pkg.id
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
+                            ? 'bg-warm-400 text-white'
+                            : 'bg-white text-brown-700 border border-warm-300 hover:bg-warm-50'
                         }`}
                       >
                         {selectedPackageId === pkg.id ? 'Selected' : 'Use Package'}
@@ -373,11 +422,11 @@ export default function BookClassPage() {
 
             {/* Booking Form */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-orange-800 mb-4">Book This Class</h2>
+              <h2 className="text-xl font-semibold text-brown-800 mb-4">Book This Class</h2>
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-orange-700 mb-1">
+                    <label className="block text-sm font-medium text-brown-700 mb-1">
                       Full Name *
                     </label>
                     <input
@@ -386,11 +435,11 @@ export default function BookClassPage() {
                       onChange={handleChange}
                       placeholder="Your full name"
                       required
-                      className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full border border-warm-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-warm-400"
                     />
                     </div>
                   <div>
-                    <label className="block text-sm font-medium text-orange-700 mb-1">
+                    <label className="block text-sm font-medium text-brown-700 mb-1">
                       Email *
                     </label>
                     <input
@@ -400,13 +449,13 @@ export default function BookClassPage() {
                       placeholder="your@email.com"
                       type="email"
                       required
-                      className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full border border-warm-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-warm-400"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-orange-700 mb-1">
+                  <label className="block text-sm font-medium text-brown-700 mb-1">
                     Phone Number
                   </label>
                   <input
@@ -415,12 +464,12 @@ export default function BookClassPage() {
                     onChange={handleChange}
                     placeholder="(555) 123-4567"
                     type="tel"
-                    className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full border border-warm-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-warm-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-orange-700 mb-1">
+                  <label className="block text-sm font-medium text-brown-700 mb-1">
                     Waiver Name *
                   </label>
                   <input
@@ -429,7 +478,7 @@ export default function BookClassPage() {
                     onChange={handleChange}
                     placeholder="Name for liability waiver"
                     required
-                    className="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full border border-warm-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-warm-400"
                   />
                 </div>
 
@@ -440,9 +489,9 @@ export default function BookClassPage() {
                     checked={form.waiverAgreed}
                     onChange={handleChange}
                     required
-                    className="mt-1 h-4 w-4 text-orange-600 focus:ring-orange-500 border-orange-300 rounded"
+                    className="mt-1 h-4 w-4 text-warm-400 focus:ring-warm-400 border-warm-300 rounded"
                   />
-                  <label className="text-sm text-orange-700">
+                  <label className="text-sm text-brown-700">
                     I agree to the liability waiver and understand the risks associated with physical activity. *
                   </label>
                   </div>
@@ -471,7 +520,7 @@ export default function BookClassPage() {
                       type="button"
                       onClick={() => handlePaymentClick('square')}
                       disabled={booking}
-                      className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center space-x-2"
+                      className="w-full py-3 px-6 rounded-lg transition-colors disabled:opacity-50 bg-warm-400 hover:bg-warm-500 text-white flex items-center justify-center space-x-2"
                     >
                       <span>💳</span>
                       <span>Pay with Credit Card - {formatPrice(individualPrice)}</span>
@@ -500,7 +549,7 @@ export default function BookClassPage() {
           {/* Pricing Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
-              <h3 className="text-lg font-semibold text-orange-800 mb-4">Pricing Summary</h3>
+              <h3 className="text-lg font-semibold text-brown-800 mb-4">Pricing Summary</h3>
               
               <div className="space-y-4">
                 {selectedPackageId && (
@@ -515,35 +564,35 @@ export default function BookClassPage() {
                   </div>
                 )}
                 
-                <div className="border-b border-orange-200 pb-4">
+                <div className="border-b border-warm-200 pb-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-orange-700">Individual Class</span>
-                    <span className="font-semibold text-orange-900">{formatPrice(individualPrice)}</span>
+                    <span className="text-brown-700">Individual Class</span>
+                    <span className="font-semibold text-brown-900">{formatPrice(individualPrice)}</span>
                   </div>
-                  <p className="text-xs text-orange-500 mt-1">
+                  <p className="text-xs text-brown-500 mt-1">
                     {individualPrice === 10 ? 'Current price until August 31, 2025' : 'New price effective September 1, 2025'}
                   </p>
                 </div>
 
-                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <div className="bg-warm-50 rounded-lg p-4 border border-warm-200">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-orange-700 font-medium">4-Class Package</span>
-                    <span className="font-semibold text-orange-900">{formatPrice(packagePrice)}</span>
+                    <span className="text-brown-700 font-medium">4-Class Package</span>
+                    <span className="font-semibold text-brown-900">{formatPrice(packagePrice)}</span>
                   </div>
                   <p className="text-xs text-blue-600 font-semibold">
                     Lock in {formatPrice(individualPrice)}/class rate
                   </p>
-                  <p className="text-xs text-orange-600 mt-1">
+                  <p className="text-xs text-brown-600 mt-1">
                     After Aug 31: {formatPrice(PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31)}/class
                   </p>
-                  <p className="text-xs text-orange-600">
+                  <p className="text-xs text-brown-600">
                     Expires in 3 months
                   </p>
                 </div>
 
                 <Link
                   href="/packages"
-                  className="block w-full bg-orange-100 text-orange-800 text-center py-2 rounded hover:bg-orange-200 transition-colors text-sm font-medium border border-orange-200"
+                  className="block w-full bg-warm-100 text-brown-800 text-center py-2 rounded hover:bg-warm-200 transition-colors text-sm font-medium border border-warm-200"
                 >
                   View Package Details →
                 </Link>

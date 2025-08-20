@@ -57,80 +57,81 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-orange-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-orange-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-orange-600">
-            Access your bookings and packages
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-t-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={form.password}
-                onChange={handleChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-orange-300 placeholder-orange-500 text-orange-900 rounded-b-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-red-600 text-sm text-center">
-              {error}
-            </div>
-          )}
-
+        <div className="bg-warm-50 p-8 rounded-lg border border-warm-200">
           <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
+            <h2 className="mt-6 text-center text-3xl font-serif font-bold text-brown-800">
+              Sign in to your account
+            </h2>
+            <p className="mt-2 text-center text-sm font-sans text-brown-700">
+              Welcome back to Wander Studios
+            </p>
           </div>
+          <div className="mt-6 border-t border-brown-800 pt-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-serif font-medium text-brown-800">
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={form.email}
+                    onChange={handleChange}
+                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-warm-300 placeholder-brown-500 text-brown-800 rounded-md focus:outline-none focus:ring-warm-400 focus:border-warm-400 sm:text-sm font-serif"
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-serif font-medium text-brown-800">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={form.password}
+                    onChange={handleChange}
+                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-warm-300 placeholder-brown-500 text-brown-800 rounded-md focus:outline-none focus:ring-warm-400 focus:border-warm-400 sm:text-sm font-serif"
+                    placeholder="Enter your password"
+                  />
+                </div>
+              </div>
 
-          <div className="text-center">
-            <p className="text-sm text-orange-600 mt-4">
-              Don&apos;t have an account?{' '}
-              <Link href="/register" className="text-orange-800 hover:text-orange-900 underline">
-                Register here
-              </Link>
-            </p>
-            <p className="text-xs text-orange-500 mt-2">
-              Existing clients: Use your email and default password &quot;Welcome2025!&quot;
-            </p>
+              {error && (
+                <div className="text-red-600 text-sm text-center font-serif">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-serif font-medium rounded-md text-white bg-warm-400 hover:bg-warm-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warm-400 disabled:opacity-50"
+                >
+                  {loading ? 'Signing in...' : 'Sign in'}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-brown-700 font-sans">
+                  Don't have an account?{' '}
+                  <Link href="/register" className="text-brown-800 hover:text-brown-900 underline font-serif">
+                    Create one here
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

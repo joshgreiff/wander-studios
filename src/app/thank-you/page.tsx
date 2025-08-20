@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
 
 type BookingData = {
@@ -105,16 +106,16 @@ function ThankYouContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="text-orange-600">Loading...</div>
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center">
+        <div className="text-brown-700 font-serif">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-pink-50">
       <div className="max-w-2xl mx-auto py-12 px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+        <div className="bg-pink-50/95 rounded-lg shadow-lg p-8 text-center border border-pink-200">
           {/* Success Icon */}
             <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -127,22 +128,22 @@ function ThankYouContent() {
           {/* Package Purchase Success */}
           {packageData && (
             <>
-              <h1 className="text-3xl font-bold text-orange-900 mb-4">
+              <h1 className="text-3xl font-serif font-bold text-brown-800 mb-4">
                 Package Purchase Successful!
               </h1>
-              <p className="text-lg text-orange-700 mb-6">
+              <p className="text-lg text-brown-700 mb-6 font-serif">
                 Thank you for purchasing the {packageData.package.name}!
               </p>
               
-              <div className="bg-orange-50 rounded-lg p-6 mb-6 text-left">
-                <h2 className="text-xl font-semibold text-orange-800 mb-4">Package Details</h2>
-                <div className="space-y-2">
+              <div className="bg-pink-100 rounded-lg p-6 mb-6 text-left">
+                <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Package Details</h2>
+                <div className="space-y-2 font-serif">
                   <p><strong>Package:</strong> {packageData.package.name}</p>
                   <p><strong>Price:</strong> ${packageData.package.price}</p>
                   <p><strong>Classes Included:</strong> {packageData.package.classCount}</p>
                   <p><strong>Expires:</strong> {new Date(packageData.expiresAt).toLocaleDateString()}</p>
                   <p><strong>Status:</strong> 
-                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-serif font-semibold ${
                       packageData.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {packageData.paid ? 'Paid' : 'Payment Pending'}
@@ -154,13 +155,13 @@ function ThankYouContent() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/classes"
-                  className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                  className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors font-serif"
                 >
                   Browse Classes
                 </Link>
                 <Link
                   href="/dashboard"
-                  className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
+                  className="bg-pink-100 text-brown-800 px-6 py-3 rounded-lg hover:bg-pink-200 transition-colors font-serif"
                 >
                   View Dashboard
                 </Link>
@@ -171,17 +172,17 @@ function ThankYouContent() {
           {/* Individual Class Booking Success */}
           {bookingData && (
           <>
-              <h1 className="text-3xl font-bold text-orange-900 mb-4">
+              <h1 className="text-3xl font-serif font-bold text-brown-800 mb-4">
                 Booking Confirmed!
               </h1>
-              <p className="text-lg text-orange-700 mb-6">
+              <p className="text-lg text-brown-700 mb-6 font-serif">
                 Thank you for booking your class, {bookingData.name}!
               </p>
 
               {/* Booking Linked Notification */}
               {typeof window !== 'undefined' && localStorage.getItem('bookingLinkedToUser') === 'true' && (
                 <div className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
-                  <p className="text-green-800 text-sm">
+                  <p className="text-green-800 text-sm font-serif">
                     ✅ Your booking has been linked to your existing account. 
                     <br />
                     <a href="/dashboard" className="text-green-600 hover:text-green-800 underline">
@@ -191,28 +192,28 @@ function ThankYouContent() {
                 </div>
               )}
 
-              <div className="bg-orange-50 rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold text-orange-800 mb-4">What&apos;s Next?</h2>
+              <div className="bg-pink-100 rounded-lg p-6 mb-6">
+                <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">What&apos;s Next?</h2>
                 <div className="space-y-3 text-left">
                   <div className="flex items-start space-x-3">
-                    <div className="text-orange-600 text-xl">📧</div>
+                    <div className="text-brown-600 text-xl">📧</div>
                     <div>
-                      <p className="font-medium text-orange-900">Confirmation Email</p>
-                      <p className="text-sm text-orange-600">You&apos;ll receive a confirmation email shortly</p>
+                      <p className="font-serif font-medium text-brown-800">Confirmation Email</p>
+                      <p className="text-sm text-brown-600 font-serif">You&apos;ll receive a confirmation email shortly</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <div className="text-orange-600 text-xl">📅</div>
+                    <div className="text-brown-600 text-xl">📅</div>
                     <div>
-                      <p className="font-medium text-orange-900">Class Reminder</p>
-                      <p className="text-sm text-orange-600">We&apos;ll send you a reminder before your class</p>
+                      <p className="font-serif font-medium text-brown-800">Class Reminder</p>
+                      <p className="text-sm text-brown-600 font-serif">We&apos;ll send you a reminder before your class</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <div className="text-orange-600 text-xl">🎯</div>
+                    <div className="text-brown-600 text-xl">🎯</div>
                     <div>
-                      <p className="font-medium text-orange-900">Save Money</p>
-                      <p className="text-sm text-orange-600">
+                      <p className="font-serif font-medium text-brown-800">Save Money</p>
+                      <p className="text-sm text-brown-600 font-serif">
                         Consider buying a class package for better value!
                       </p>
                     </div>
@@ -220,16 +221,75 @@ function ThankYouContent() {
                 </div>
               </div>
 
+              {/* Calendar Integration */}
+              <div className="bg-warm-50 rounded-lg p-6 mb-6 border border-warm-200">
+                <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">📅 Add to Calendar</h2>
+                <p className="text-brown-600 mb-4 font-serif">
+                  Never miss your class! Add it to your calendar to get reminders.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      // We'll need to fetch class details to create the calendar event
+                      if (classId) {
+                        fetch(`/api/classes/${classId}`)
+                          .then(res => res.json())
+                          .then(classData => {
+                            const event = createClassCalendarEvent(
+                              classData.description,
+                              classData.date,
+                              classData.time,
+                              60,
+                              classData.address,
+                              `Join us for ${classData.description} at Wander Movement!${classData.isVirtual && classData.virtualLink ? `\n\nVirtual Class Link: ${classData.virtualLink}` : ''}`
+                            );
+                            const icalContent = generateICalEvent(event);
+                            downloadCalendarFile(icalContent, `wander-movement-${classData.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                          });
+                      }
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <span>📱</span>
+                    <span>Apple Calendar</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (classId) {
+                        fetch(`/api/classes/${classId}`)
+                          .then(res => res.json())
+                          .then(classData => {
+                            const event = createClassCalendarEvent(
+                              classData.description,
+                              classData.date,
+                              classData.time,
+                              60,
+                              classData.address,
+                              `Join us for ${classData.description} at Wander Movement!${classData.isVirtual && classData.virtualLink ? `\n\nVirtual Class Link: ${classData.virtualLink}` : ''}`
+                            );
+                            const googleUrl = generateGoogleCalendarUrl(event);
+                            window.open(googleUrl, '_blank');
+                          });
+                      }
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <span>📅</span>
+                    <span>Google Calendar</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/dashboard"
-                  className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                  className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors font-serif"
                 >
                   View Dashboard
                 </Link>
                 <Link
                   href="/packages"
-                  className="bg-orange-100 text-orange-800 px-6 py-3 rounded-lg hover:bg-orange-200 transition-colors"
+                  className="bg-pink-100 text-brown-800 px-6 py-3 rounded-lg hover:bg-pink-200 transition-colors font-serif"
                 >
                   Buy Class Package
                 </Link>
@@ -238,10 +298,10 @@ function ThankYouContent() {
         )}
 
           {/* Contact Information */}
-          <div className="mt-8 pt-6 border-t border-orange-200">
-            <p className="text-sm text-orange-600">
+          <div className="mt-8 pt-6 border-t border-pink-200">
+            <p className="text-sm text-brown-600 font-serif">
               Questions? Contact us at{' '}
-              <a href="mailto:ltwander@gmail.com" className="text-orange-800 hover:text-orange-900 underline">
+              <a href="mailto:ltwander@gmail.com" className="text-brown-800 hover:text-brown-900 underline">
                 ltwander@gmail.com
               </a>
             </p>

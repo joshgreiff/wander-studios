@@ -79,13 +79,13 @@ export default function BookPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-200 via-orange-400 to-red-400 flex flex-col items-center p-4">
-      <section className="max-w-2xl w-full bg-white/90 rounded-xl shadow p-8 flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-6 text-orange-900 text-center">Book a Class</h1>
+    <main className="min-h-screen bg-gradient-to-br from-warm-50 via-warm-100 to-warm-200 flex flex-col items-center p-4">
+      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 flex flex-col items-center border border-warm-200">
+        <h1 className="text-3xl font-serif font-bold mb-6 text-brown-800 text-center">Book a Class</h1>
         {loading ? (
-          <div className="text-orange-700">Loading...</div>
+          <div className="text-brown-700 font-serif">Loading...</div>
         ) : classes.length === 0 ? (
-          <div className="text-orange-700">No classes scheduled yet.</div>
+          <div className="text-brown-700 font-serif">No classes scheduled yet.</div>
         ) : (
           <ul className="w-full flex flex-col gap-4">
             {classes.map(c => {
@@ -94,13 +94,13 @@ export default function BookPage() {
               const isFull = availableSpots <= 0;
               
               return (
-                <li key={c.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 shadow">
+                <li key={c.id} className="border border-warm-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-warm-50/80 shadow">
                   <div>
-                    <div className="font-semibold text-orange-900 text-lg">{formatDateTime(c.date, c.time)}</div>
-                    <div className="text-orange-800">{c.description}</div>
-                    <div className="text-orange-700 text-sm">
+                    <div className="font-serif font-semibold text-brown-800 text-lg">{formatDateTime(c.date, c.time)}</div>
+                    <div className="text-brown-700 font-serif">{c.description}</div>
+                    <div className="text-brown-600 text-sm font-serif">
                       {isFull ? (
-                        <span className="text-red-600 font-semibold">Class Full ({c.capacity}/{c.capacity})</span>
+                        <span className="text-red-600 font-serif font-semibold">Class Full ({c.capacity}/{c.capacity})</span>
                       ) : (
                         <span>Available Spots: {availableSpots}/{c.capacity}</span>
                       )}
@@ -108,12 +108,12 @@ export default function BookPage() {
                   </div>
                   {isFull ? (
                     <div className="mt-4 sm:mt-0 text-center">
-                      <span className="bg-red-100 text-red-800 px-3 py-2 rounded text-sm font-semibold">Full</span>
+                      <span className="bg-red-100 text-red-800 px-3 py-2 rounded text-sm font-serif font-semibold">Full</span>
                     </div>
                   ) : (
                     <Link
                       href={`/book/${c.id}`}
-                      className="mt-4 sm:mt-0 bg-orange-600 text-white font-semibold py-2 px-6 rounded hover:bg-orange-700 transition text-center"
+                      className="mt-4 sm:mt-0 bg-warm-400 text-white font-serif font-semibold py-2 px-6 rounded hover:bg-warm-500 transition text-center"
                     >
                       Book
                     </Link>
