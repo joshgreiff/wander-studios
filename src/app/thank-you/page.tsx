@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
@@ -39,33 +39,7 @@ function ThankYouContent() {
   const waiverName = searchParams?.get('waiverName');
   const waiverAgreed = searchParams?.get('waiverAgreed');
 
-  useEffect(() => {
-    
-    if (type === 'package') {
-      if (packageBookingId) {
-        fetchPackageData(packageBookingId);
-      }
-    } else {
-      // Handle individual class booking
-      if (classId && email && name) {
-        const bookingData = {
-          classId,
-          email,
-          name,
-          phone: phone || undefined,
-          waiverName: waiverName || undefined,
-          waiverAgreed: waiverAgreed === 'true'
-        };
-        setBookingData(bookingData);
-        
-        // Create the actual booking
-        createBooking(bookingData);
-      }
-    }
-    setLoading(false);
-  }, [searchParams]);
-
-  const createBooking = async (bookingData: BookingData) => {
+  const createBooking = useCallback(async (bookingData: BookingData) => {
     try {
       const response = await fetch('/api/bookings', {
         method: 'POST',
@@ -90,9 +64,9 @@ function ThankYouContent() {
     } catch (error) {
       console.error('Error creating booking:', error);
     }
-  };
+  }, []);
 
-  const fetchPackageData = async (packageBookingId: string) => {
+  const fetchPackageData = useCallback(async (packageBookingId: string) => {
     try {
       const response = await fetch(`/api/packages/${packageBookingId}`);
       if (response.ok) {
@@ -102,7 +76,33 @@ function ThankYouContent() {
     } catch (error) {
       console.error('Error fetching package data:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    
+    if (type === 'package') {
+      if (packageBookingId) {
+        fetchPackageData(packageBookingId);
+      }
+    } else {
+      // Handle individual class booking
+      if (classId && email && name) {
+        const bookingData = {
+          classId,
+          email,
+          name,
+          phone: phone || undefined,
+          waiverName: waiverName || undefined,
+          waiverAgreed: waiverAgreed === 'true'
+        };
+        setBookingData(bookingData);
+        
+        // Create the actual booking
+        createBooking(bookingData);
+      }
+    }
+    setLoading(false);
+  }, [type, packageBookingId, classId, email, name, phone, waiverName, waiverAgreed]);
 
   if (loading) {
     return (

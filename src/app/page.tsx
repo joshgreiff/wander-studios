@@ -1,24 +1,24 @@
-import Image from "next/image";
+import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-warm-50 via-warm-100 to-warm-200 flex flex-col items-center justify-center p-4">
       <section className="max-w-2xl w-full text-center bg-warm-50/90 rounded-xl shadow-lg p-8 mb-8 border border-warm-200">
         <h1 className="text-4xl font-serif font-bold mb-4 text-brown-800">Wander Movement - Pilates, Yoga, Dance</h1>
         <p className="mb-4 text-lg text-brown-700 font-serif">Hello! I&apos;m so happy you are here. Whether you are a friend, or current/future client, I&apos;m excited to welcome you to a wellness space that will leave you feeling better than you started.</p>
         <div className="flex justify-center mb-6">
-          <img
+          <Image
             src="/images/IMG_8658.JPG"
             alt="Wander Movement instructor"
-            className="rounded-lg shadow-md object-cover"
             width={400}
             height={400}
+            className="rounded-lg shadow-md object-cover"
           />
         </div>
-        <a href="/book" className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition mb-6">
+        <Link href="/book" className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition mb-6">
           Book a Class
-        </a>
+        </Link>
         <p className="text-brown-800 font-serif font-semibold mb-2">All levels, all budgets, all sizes. <span className="italic">Come as you are.</span></p>
       </section>
 

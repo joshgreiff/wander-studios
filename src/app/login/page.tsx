@@ -123,7 +123,7 @@ function LoginForm() {
 
               <div className="text-center">
                 <p className="text-sm text-brown-700 font-sans">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link href="/register" className="text-brown-800 hover:text-brown-900 underline font-serif">
                     Create one here
                   </Link>
