@@ -102,7 +102,7 @@ function ThankYouContent() {
       }
     }
     setLoading(false);
-  }, [type, packageBookingId, classId, email, name, phone, waiverName, waiverAgreed]);
+  }, [type, packageBookingId, classId, email, name, phone, waiverName, waiverAgreed, createBooking, fetchPackageData]);
 
   if (loading) {
     return (

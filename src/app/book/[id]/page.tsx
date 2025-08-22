@@ -77,7 +77,7 @@ export default function BookClassPage() {
       setUser(userObj);
       fetchAvailablePackages(userObj.id);
     }
-  }, []);
+  }, [fetchAvailablePackages]);
 
   const fetchClass = useCallback(async (classId: number) => {
     try {

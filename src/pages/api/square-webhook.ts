@@ -4,6 +4,29 @@ import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
+// Square webhook types
+interface SquarePayment {
+  id: string;
+  status: string;
+  totalMoney?: {
+    amount: number;
+    currency: string;
+  };
+  [key: string]: unknown;
+}
+
+interface SquareLineItem {
+  name?: string;
+  [key: string]: unknown;
+}
+
+interface SquareOrder {
+  id: string;
+  state: string;
+  lineItems?: SquareLineItem[];
+  [key: string]: unknown;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -54,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-async function handlePaymentCompleted(payment: any) {
+async function handlePaymentCompleted(payment: SquarePayment) {
   console.log('Processing completed payment:', payment.id);
   
   try {
@@ -97,7 +120,7 @@ async function handlePaymentCompleted(payment: any) {
   }
 }
 
-async function handleOrderCompleted(order: any) {
+async function handleOrderCompleted(order: SquareOrder) {
   console.log('Processing completed order:', order.id);
   
   try {
