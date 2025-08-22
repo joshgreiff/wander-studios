@@ -50,6 +50,7 @@ model Booking {
   paid         Boolean  @default(false)
   createdAt    DateTime @default(now())
   waiverId     Int?
+  packageBookingId Int?  // Link to package booking if this booking used a package
   
   // Link to user account (optional)
   userId       Int?
@@ -57,6 +58,7 @@ model Booking {
   
   class        Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   waiver       Waiver?  @relation(fields: [waiverId], references: [id])
+  packageBooking PackageBooking? @relation(fields: [packageBookingId], references: [id], onDelete: SetNull)
 }
 
 model ClassPackage {
@@ -87,6 +89,7 @@ model PackageBooking {
   expiresAt     DateTime     // When the package expires
   createdAt     DateTime     @default(now())
   waiverId      Int?
+  paymentId     String?      // Square payment ID for tracking
   
   // Link to user account (required for packages)
   userId        Int
@@ -97,6 +100,9 @@ model PackageBooking {
   
   // Individual class redemptions from this package
   packageRedemptions PackageRedemption[]
+  
+  // Bookings that used this package
+  bookings Booking[]
 }
 
 model PackageRedemption {

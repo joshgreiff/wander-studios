@@ -89,7 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         waiverName,
         waiverAgreed,
         paid: true, // Package classes are pre-paid
-        userId: Number(userId)
+        userId: Number(userId),
+        packageBookingId: Number(packageBookingId) // Link to the package booking
       }
     });
 

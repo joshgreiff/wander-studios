@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCurrentIndividualClassPrice, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
+import { getCurrentIndividualClassPrice, getClassPriceForDate, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
 import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
 
@@ -54,7 +54,8 @@ export default function BookClassPage() {
     paymentMethod: 'square'
   });
 
-  const individualPrice = getCurrentIndividualClassPrice();
+  // Calculate pricing based on class date if available, otherwise use current date
+  const individualPrice = classItem ? getClassPriceForDate(new Date(classItem.date)) : getCurrentIndividualClassPrice();
   const packagePrice = getPackagePrice();
 
   const fetchAvailablePackages = useCallback(async (userId: number) => {

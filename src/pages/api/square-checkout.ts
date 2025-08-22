@@ -5,10 +5,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Simple pricing function for server-side use
-function getCurrentIndividualClassPrice(): number {
-  const now = new Date();
-  const august31 = new Date('2025-08-31');
-  return now <= august31 ? 10 : 14; // $10 before Aug 31, $14 after
+function getClassPriceForDate(classDate: Date): number {
+  // Normalize the date to start of day in UTC for consistent comparison
+  const normalizedDate = new Date(Date.UTC(classDate.getFullYear(), classDate.getMonth(), classDate.getDate()));
+  const august31 = new Date(Date.UTC(2025, 7, 31)); // August 31, 2025 (month is 0-indexed)
+  return normalizedDate <= august31 ? 10 : 14; // $10 on or before Aug 31, $14 after
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -67,8 +68,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       token: SQUARE_ACCESS_TOKEN,
     });
 
-    // Get dynamic pricing
-    const priceInDollars = getCurrentIndividualClassPrice();
+    // Get dynamic pricing based on class date
+    const classDate = new Date(classItem.date);
+    const priceInDollars = getClassPriceForDate(classDate);
     const priceInCents = priceInDollars * 100;
 
     // Pass the full order object directly to paymentLinks.create

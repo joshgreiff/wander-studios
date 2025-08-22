@@ -8,10 +8,14 @@ export const PRICING_CONFIG = {
 };
 
 /**
- * Get the individual class price based on the current date
+ * Get the individual class price based on the class date
  */
 export function getIndividualClassPrice(date: Date = new Date()): number {
-  if (date >= PRICING_CONFIG.PRICE_CHANGE_DATE) {
+  // Normalize the date to start of day in UTC for consistent comparison
+  const normalizedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const august31 = new Date(Date.UTC(2025, 7, 31)); // August 31, 2025 (month is 0-indexed)
+  
+  if (normalizedDate > august31) {
     return PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31;
   }
   return PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_BEFORE_AUGUST_31;
@@ -23,6 +27,14 @@ export function getIndividualClassPrice(date: Date = new Date()): number {
  */
 export function getCurrentIndividualClassPrice(): number {
   return getIndividualClassPrice();
+}
+
+/**
+ * Get the individual class price for a specific class date
+ * Note: This should be used when booking classes to get the correct price for that class date
+ */
+export function getClassPriceForDate(classDate: Date): number {
+  return getIndividualClassPrice(classDate);
 }
 
 /**
