@@ -102,6 +102,9 @@ function LoginForm() {
                     className="mt-1 appearance-none relative block w-full px-3 py-2 border border-warm-300 placeholder-brown-500 text-brown-800 rounded-md focus:outline-none focus:ring-warm-400 focus:border-warm-400 sm:text-sm font-serif"
                     placeholder="Enter your password"
                   />
+                  <p className="mt-1 text-xs text-brown-600 font-sans">
+                    Default password: <span className="font-mono bg-gray-100 px-1 rounded">Welcome2025!</span>
+                  </p>
                 </div>
               </div>
 
