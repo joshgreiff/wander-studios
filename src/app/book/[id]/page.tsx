@@ -182,25 +182,47 @@ export default function BookClassPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    // Create a date object and format it in the local timezone
-    const date = new Date(dateString);
-    // Use toLocaleDateString without explicit timezone to use local timezone
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    // Convert 24-hour format to 12-hour format with AM/PM
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+  const formatDateTime = (date: string, time: string) => {
+    try {
+      // Parse the date string to extract year, month, day
+      // Handle both ISO format (2025-08-31T00:00:00.000Z) and simple format (2025-08-31)
+      let year: number, month: number, day: number;
+      
+      if (date.includes('T')) {
+        // ISO format: extract date part before 'T'
+        const datePart = date.split('T')[0];
+        [year, month, day] = datePart.split('-').map(Number);
+      } else {
+        // Simple format: YYYY-MM-DD
+        [year, month, day] = date.split('-').map(Number);
+      }
+      
+      // Validate the parsed values
+      if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+        console.error('Invalid date components:', { year, month, day, originalDate: date });
+        return 'Date Error';
+      }
+      
+      // Create a date object to get the day of the week
+      const dateObj = new Date(year, month - 1, day);
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayOfWeek = dayNames[dateObj.getDay()];
+      
+      // Parse the time string (format: "HH:MM")
+      const [hours, minutes] = time.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) {
+        console.error('Invalid time components:', { hours, minutes, originalTime: time });
+        return 'Time Error';
+      }
+      
+      const hour = hours % 12 || 12;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      return `${dayOfWeek} ${month}/${day} ${hour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Date:', date, 'Time:', time);
+      return 'Date Error';
+    }
   };
 
   if (loading) {
@@ -247,11 +269,7 @@ export default function BookClassPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-brown-600">📅</span>
-                  <span>{formatDate(classItem.date)}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-brown-600">⏰</span>
-                  <span>{formatTime(classItem.time)}</span>
+                  <span>{formatDateTime(classItem.date, classItem.time)}</span>
                 </div>
                 {classItem.address && (
                   <div className="flex items-center space-x-2">
