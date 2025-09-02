@@ -31,8 +31,8 @@ type PackageBooking = {
   customerName: string;
   customerEmail: string;
   paid: boolean;
-  redeemed: boolean;
-  redeemedAt?: string;
+  classesUsed: number;
+  classesRemaining: number;
   expiresAt: string;
   createdAt: string;
   package: {
@@ -216,9 +216,8 @@ export default function DashboardPage() {
   };
 
   const getRemainingClasses = (packageBooking: PackageBooking) => {
-    // This would need to be calculated based on how many classes have been redeemed
-    // For now, we'll show a simple count
-    return packageBooking.package.classCount - (packageBooking.redeemed ? 1 : 0);
+    // Use the classesRemaining field from the database
+    return packageBooking.classesRemaining;
   };
 
   const isPackageExpired = (expiresAt: string) => {
@@ -341,11 +340,7 @@ export default function DashboardPage() {
                         <p className="text-sm text-brown-600 font-serif">
                           🎯 Remaining classes: {getRemainingClasses(packageBooking)}/{packageBooking.package.classCount}
                         </p>
-                        {packageBooking.redeemed && packageBooking.class && (
-                          <p className="text-sm text-green-600 font-serif">
-                            ✅ Used for: {packageBooking.class.description} on {formatDateTime(packageBooking.class.date, packageBooking.class.time)}
-                          </p>
-                        )}
+
                         {isPackageExpired(packageBooking.expiresAt) && (
                           <p className="text-sm text-red-600 font-serif font-semibold">
                             ⚠️ Package expired
@@ -367,12 +362,12 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Individual Class Bookings */}
-        {bookings.length > 0 && (
-          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 border border-pink-200">
-            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Your Class Bookings</h2>
+        {/* Upcoming Class Bookings */}
+        {bookings.filter(booking => new Date(booking.class.date) >= new Date()).length > 0 && (
+          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
+            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Upcoming Class Bookings</h2>
             <div className="space-y-4">
-              {bookings.map((booking) => (
+              {bookings.filter(booking => new Date(booking.class.date) >= new Date()).map((booking) => (
                 <div key={booking.id} className="border border-pink-200 rounded-lg p-4 bg-white/50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -411,6 +406,39 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Past Classes Taken */}
+        {bookings.filter(booking => new Date(booking.class.date) < new Date()).length > 0 && (
+          <div className="bg-pink-50/95 rounded-lg shadow-md p-6 mb-6 border border-pink-200">
+            <h2 className="text-xl font-serif font-semibold text-brown-700 mb-4">Past Classes Taken</h2>
+            <div className="space-y-4">
+              {bookings.filter(booking => new Date(booking.class.date) < new Date()).map((booking) => (
+                <div key={booking.id} className="border border-pink-200 rounded-lg p-4 bg-white/50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-serif font-semibold text-brown-800">{booking.class.description}</h3>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-brown-600 font-serif">
+                          📅 {formatDateTime(booking.class.date, booking.class.time)}
+                        </p>
+                        {booking.class.address && (
+                          <p className="text-sm text-brown-600 font-serif">
+                            📍 {booking.class.address}
+                          </p>
+                        )}
+                        <p className="text-sm text-green-600 font-serif">
+                          ✅ Completed
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
 
         {/* No Bookings Message */}
         {bookings.length === 0 && packageBookings.length === 0 && (
