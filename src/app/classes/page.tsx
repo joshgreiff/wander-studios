@@ -187,7 +187,7 @@ export default function ClassesPage() {
         <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Additional Classes at Generations</h2>
         <div className="text-brown-700 font-serif space-y-4">
           <p>
-            Mat Pilates class in Westerville, OH, at Generations Performing Arts Center. To sign up, create an account, click Register, and then Classes. You will find the Pilates classes under "Class Sessions" please reach out to Ltwander@gmail.com with questions.
+            Mat Pilates class in Westerville, OH, at Generations Performing Arts Center. To sign up, create an account, click Register, and then Classes. You will find the Pilates classes under &quot;Class Sessions&quot; please reach out to Ltwander@gmail.com with questions.
           </p>
           <div className="text-center">
             <a 
