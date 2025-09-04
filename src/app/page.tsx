@@ -6,10 +6,10 @@ export default function HomePage() {
     <main className="min-h-screen bg-gradient-to-br from-warm-50 via-warm-100 to-warm-200 flex flex-col items-center justify-center p-4">
       <section className="max-w-2xl w-full text-center bg-warm-50/90 rounded-xl shadow-lg p-8 mb-8 border border-warm-200">
         <h1 className="text-4xl font-serif font-bold mb-4 text-brown-800">Wander Movement - Pilates, Yoga, Dance</h1>
-        <p className="mb-4 text-lg text-brown-700 font-serif">Hello! I&apos;m so happy you are here. Whether you are a friend, or current/future client, I&apos;m excited to welcome you to a wellness space that will leave you feeling better than you started.</p>
+        <p className="mb-4 text-lg text-brown-700 font-serif">Hello! Welcome to Wander Movement, where we offer low-cost, wellness focused Pilates drop-in classes. I&apos;m excited to welcome you to a community where you will leave feeling connected, confident, and strong.</p>
         <div className="flex justify-center mb-6">
           <Image
-            src="/images/IMG_8658.JPG"
+            src="/images/FB447B20-86DA-4C3C-B9E1-0AD284641692.jpeg"
             alt="Wander Movement instructor"
             width={400}
             height={400}

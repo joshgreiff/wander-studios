@@ -182,6 +182,25 @@ export default function ClassesPage() {
           </ul>
         )}
       </section>
+
+      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
+        <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Additional Classes at Generations</h2>
+        <div className="text-brown-700 font-serif space-y-4">
+          <p>
+            Mat Pilates class in Westerville, OH, at Generations Performing Arts Center. To sign up, create an account, click Register, and then Classes. You will find the Pilates classes under "Class Sessions" please reach out to Ltwander@gmail.com with questions.
+          </p>
+          <div className="text-center">
+            <a 
+              href="https://app.gostudiopro.com/online/index.php?account_id=6191&device_id=&devicetoken=" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+            >
+              Sign Up for Generations Classes
+            </a>
+          </div>
+        </div>
+      </section>
     </main>
   );
-} 
+}

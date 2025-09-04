@@ -24,6 +24,11 @@ interface SquareOrder {
   id: string;
   state: string;
   lineItems?: SquareLineItem[];
+  metadata?: {
+    packageBookingId?: string;
+    packageName?: string;
+    customerEmail?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -81,11 +86,56 @@ async function handlePaymentCompleted(payment: SquarePayment) {
   console.log('Processing completed payment:', payment.id);
   
   try {
-    // Look for package bookings that might be associated with this payment
-    // We can identify package payments by looking at the order metadata or line items
+    // Get the order associated with this payment to access metadata
+    const orderId = (payment as { orderId?: string }).orderId;
+    if (!orderId) {
+      console.log('No order ID found in payment, skipping');
+      return;
+    }
+
+    // Look up the order to get metadata
+    const order = await prisma.$queryRaw`
+      SELECT metadata FROM square_orders WHERE id = ${orderId}
+    ` as { metadata?: { packageBookingId?: string } }[];
     
-    // For now, we'll check if there are any unpaid package bookings
-    // In a more robust implementation, you'd store the payment ID with the package booking
+    if (!order || !order[0]?.metadata) {
+      console.log('No order metadata found, trying fallback method');
+      await handlePaymentCompletedFallback(payment);
+      return;
+    }
+
+    const metadata = order[0].metadata;
+    const packageBookingId = metadata.packageBookingId;
+    
+    if (packageBookingId) {
+      console.log(`Found package booking ID: ${packageBookingId} in order metadata`);
+      
+      // Mark the specific package as paid
+      await prisma.packageBooking.update({
+        where: { id: parseInt(packageBookingId) },
+        data: { 
+          paid: true,
+          paymentId: payment.id
+        }
+      });
+      
+      console.log(`Successfully marked package ${packageBookingId} as paid for payment ${payment.id}`);
+    } else {
+      console.log('No package booking ID found in metadata, trying fallback method');
+      await handlePaymentCompletedFallback(payment);
+    }
+  } catch (error) {
+    console.error('Error handling payment completion:', error);
+    // Fallback to old method if metadata approach fails
+    await handlePaymentCompletedFallback(payment);
+  }
+}
+
+async function handlePaymentCompletedFallback(payment: SquarePayment) {
+  console.log('Using fallback payment matching method');
+  
+  try {
+    // Fallback: Look for unpaid package bookings in the last 24 hours
     const unpaidPackages = await prisma.packageBooking.findMany({
       where: {
         paid: false,
@@ -95,28 +145,34 @@ async function handlePaymentCompleted(payment: SquarePayment) {
       },
       include: {
         package: true
+      },
+      orderBy: {
+        createdAt: 'desc' // Most recent first
       }
     });
 
-    // For each unpaid package, check if the payment amount matches
-    for (const packageBooking of unpaidPackages) {
-      const expectedAmount = Math.round(packageBooking.package.price * 100); // Convert to cents
+    if (unpaidPackages.length === 0) {
+      console.log('No unpaid packages found in last 24 hours');
+      return;
+    }
+
+    // Find the most recent unpaid package that matches the payment amount
+    const expectedAmount = Math.round(unpaidPackages[0].package.price * 100); // Convert to cents
+    
+    if (payment.totalMoney && payment.totalMoney.amount >= expectedAmount) {
+      const packageToMark = unpaidPackages[0];
+      console.log(`Fallback: Marking package ${packageToMark.id} as paid for payment ${payment.id}`);
       
-      // Check if payment amount matches package price (with some tolerance for tax)
-      if (payment.totalMoney && payment.totalMoney.amount >= expectedAmount) {
-        console.log(`Marking package ${packageBooking.id} as paid for payment ${payment.id}`);
-        
-        await prisma.packageBooking.update({
-          where: { id: packageBooking.id },
-          data: { paid: true }
-        });
-        
-        // Only mark one package as paid per payment
-        break;
-      }
+      await prisma.packageBooking.update({
+        where: { id: packageToMark.id },
+        data: { 
+          paid: true,
+          paymentId: payment.id
+        }
+      });
     }
   } catch (error) {
-    console.error('Error handling payment completion:', error);
+    console.error('Error in fallback payment handling:', error);
   }
 }
 
@@ -124,7 +180,28 @@ async function handleOrderCompleted(order: SquareOrder) {
   console.log('Processing completed order:', order.id);
   
   try {
-    // Check if this order contains a package purchase
+    // Check if this order contains a package purchase using metadata
+    const orderMetadata = (order as { metadata?: { packageBookingId?: string } }).metadata;
+    
+    if (orderMetadata && orderMetadata.packageBookingId) {
+      const packageBookingId = orderMetadata.packageBookingId;
+      console.log(`Found package booking ID: ${packageBookingId} in order metadata`);
+      
+      // Mark the specific package as paid
+      await prisma.packageBooking.update({
+        where: { id: parseInt(packageBookingId) },
+        data: { 
+          paid: true,
+          paymentId: order.id // Use order ID as payment ID for now
+        }
+      });
+      
+      console.log(`Successfully marked package ${packageBookingId} as paid for order ${order.id}`);
+      return;
+    }
+    
+    // Fallback: Check line items for package purchases
+    console.log('No metadata found, checking line items...');
     const lineItems = order.lineItems || [];
     
     for (const item of lineItems) {
@@ -140,20 +217,25 @@ async function handleOrderCompleted(order: SquareOrder) {
           },
           include: {
             package: true
+          },
+          orderBy: {
+            createdAt: 'desc' // Most recent first
           }
         });
 
-        for (const packageBooking of unpaidPackages) {
-          if (item.name.includes(packageBooking.package.name)) {
-            console.log(`Marking package ${packageBooking.id} as paid for order ${order.id}`);
-            
-            await prisma.packageBooking.update({
-              where: { id: packageBooking.id },
-              data: { paid: true }
-            });
-            
-            break;
-          }
+        if (unpaidPackages.length > 0) {
+          const packageToMark = unpaidPackages[0];
+          console.log(`Fallback: Marking package ${packageToMark.id} as paid for order ${order.id}`);
+          
+          await prisma.packageBooking.update({
+            where: { id: packageToMark.id },
+            data: { 
+              paid: true,
+              paymentId: order.id
+            }
+          });
+          
+          break; // Only mark one package per order
         }
       }
     }

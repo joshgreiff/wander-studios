@@ -84,6 +84,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             scope: 'ORDER',
           },
         ],
+        metadata: {
+          packageBookingId: packageBooking.id.toString(),
+          packageName: packageData.name,
+          customerEmail: customerEmail
+        }
       },
       checkoutOptions: {
         redirectUrl: `${req.headers.origin}/thank-you?type=package&packageBookingId=${packageBooking.id}`,
