@@ -141,9 +141,7 @@ export default function PackagesPage() {
               <h3 className="font-serif font-semibold text-brown-800 mb-2">Individual Classes</h3>
               <p className="text-2xl font-serif font-bold text-brown-600">{formatPrice(individualPrice)}</p>
               <p className="text-sm text-brown-600 font-serif">per class</p>
-              <p className="text-sm text-brown-500 mt-2 font-serif">
-                {individualPrice === 10 ? 'Current price until August 31, 2025' : 'New price effective September 1, 2025'}
-              </p>
+
             </div>
             <div className="border-2 border-pink-400 rounded-lg p-4 bg-pink-100">
               <h3 className="font-serif font-semibold text-brown-800 mb-2">4-Class Package</h3>

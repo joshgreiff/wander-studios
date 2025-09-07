@@ -1,8 +1,8 @@
 // Pricing configuration
 export const PRICING_CONFIG = {
-  INDIVIDUAL_CLASS_PRICE_BEFORE_AUGUST_31: 10, // $10 before August 31, 2025 (current)
-  INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31: 14,   // $14 after August 31, 2025 (future)
-  PRICE_CHANGE_DATE: new Date('2025-08-31'),    // August 31, 2025
+  INDIVIDUAL_CLASS_PRICE_BEFORE_AUGUST_31: 10, // $10 (legacy pricing)
+  INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31: 14,   // $14 (current pricing)
+  PRICE_CHANGE_DATE: new Date('2025-08-31'),    // Price change date
   PACKAGE_PRICE: 40,                            // $40 for 4-class package
   PACKAGE_CLASSES: 4                            // 4 classes per package
 };
@@ -22,8 +22,8 @@ export function getIndividualClassPrice(date: Date = new Date()): number {
 }
 
 /**
- * Get the current individual class price
- * Note: Currently $10, will be $14 after August 31, 2025
+ * Get the individual class price for a given date
+ * $10 for classes on or before August 31, 2025, $14 after
  */
 export function getCurrentIndividualClassPrice(): number {
   return getIndividualClassPrice();

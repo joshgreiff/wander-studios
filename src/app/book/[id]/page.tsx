@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getCurrentIndividualClassPrice, getClassPriceForDate, getPackagePrice, formatPrice, PRICING_CONFIG } from '@/utils/pricing';
+import { getCurrentIndividualClassPrice, getClassPriceForDate, getPackagePrice, formatPrice } from '@/utils/pricing';
 import { createClassCalendarEvent, generateICalEvent, generateGoogleCalendarUrl, downloadCalendarFile } from '@/utils/calendar';
 import Link from 'next/link';
 
@@ -369,17 +369,17 @@ export default function BookClassPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-brown-900 mb-2">
-                    💰 Lock in Current Pricing with Class Packages!
+                    💰 Save with Class Packages!
                   </h3>
                   <p className="text-brown-700 mb-3">
                     Get {formatPrice(packagePrice)} for 4 classes 
                     <br />
                     <span className="font-semibold text-blue-600">
-                      Currently: {formatPrice(individualPrice)}/class • After Aug 31: {formatPrice(PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31)}/class
+                      Individual classes: {formatPrice(individualPrice)}/class
                     </span>
                     <br />
                     <span className="font-semibold text-green-600">
-                      Lock in the {formatPrice(individualPrice)}/class rate before prices increase!
+                      Save money with our 4-class package!
                     </span>
                   </p>
                   <Link
@@ -588,9 +588,7 @@ export default function BookClassPage() {
                     <span className="text-brown-700">Individual Class</span>
                     <span className="font-semibold text-brown-900">{formatPrice(individualPrice)}</span>
                   </div>
-                  <p className="text-xs text-brown-500 mt-1">
-                    {individualPrice === 10 ? 'Current price until August 31, 2025' : 'New price effective September 1, 2025'}
-                  </p>
+
                 </div>
 
                 <div className="bg-warm-50 rounded-lg p-4 border border-warm-200">
@@ -599,10 +597,7 @@ export default function BookClassPage() {
                     <span className="font-semibold text-brown-900">{formatPrice(packagePrice)}</span>
                   </div>
                   <p className="text-xs text-blue-600 font-semibold">
-                    Lock in {formatPrice(individualPrice)}/class rate
-                  </p>
-                  <p className="text-xs text-brown-600 mt-1">
-                    After Aug 31: {formatPrice(PRICING_CONFIG.INDIVIDUAL_CLASS_PRICE_AFTER_AUGUST_31)}/class
+                    Save with our 4-class package
                   </p>
                   <p className="text-xs text-brown-600">
                     Expires in 3 months
