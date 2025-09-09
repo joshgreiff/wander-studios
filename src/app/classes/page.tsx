@@ -116,11 +116,9 @@ export default function ClassesPage() {
                         <span>Available Spots: {availableSpots}/{c.capacity}</span>
                       )}
                     </div>
-                    {c.isVirtual && c.virtualLink && (
+                    {c.isVirtual && (
                       <div className="text-blue-700 text-sm mt-1">
-                        <a href={c.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
-                          🔗 Virtual Class Link
-                        </a>
+                        🔗 Virtual class link will be provided after booking
                       </div>
                     )}
                     

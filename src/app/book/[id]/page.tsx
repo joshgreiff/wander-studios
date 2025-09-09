@@ -277,13 +277,11 @@ export default function BookClassPage() {
                     <span>{classItem.address}</span>
                   </div>
                 )}
-                {classItem.isVirtual && classItem.virtualLink && (
+                {classItem.isVirtual && (
                   <div className="flex items-center space-x-2">
                     <span className="text-brown-600">🔗</span>
                     <span className="text-blue-600">
-                      <a href={classItem.virtualLink} target="_blank" rel="noopener noreferrer" className="underline">
-                        Virtual Class Link
-                      </a>
+                      Virtual class link will be provided after booking
                     </span>
                   </div>
                 )}

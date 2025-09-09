@@ -14,7 +14,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
       if (!classItem) return res.status(404).json({ error: 'Class not found' });
-      return res.status(200).json(classItem);
+      
+      // Remove virtual link from public API response for security
+      const publicClassItem = {
+        ...classItem,
+        virtualLink: undefined // Remove virtual link from public API
+      };
+      
+      return res.status(200).json(publicClassItem);
     } catch {
       return res.status(500).json({ error: 'Failed to fetch class' });
     }

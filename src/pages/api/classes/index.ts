@@ -11,7 +11,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: { bookings: true },
         orderBy: { date: 'asc' }
     });
-    return res.status(200).json(classes);
+    
+    // Remove virtual links from public API response for security
+    const publicClasses = classes.map(classItem => ({
+      ...classItem,
+      virtualLink: undefined // Remove virtual links from public API
+    }));
+    
+    return res.status(200).json(publicClasses);
     } catch {
       return res.status(500).json({ error: 'Failed to fetch classes' });
     }
