@@ -29,6 +29,7 @@ model Class {
   time            String
   description     String
   capacity        Int
+  price           Float?           // Custom price for this class (optional, falls back to default pricing)
   createdAt       DateTime         @default(now())
   address         String?
   archived        Boolean          @default(false)

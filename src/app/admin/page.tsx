@@ -18,6 +18,7 @@ type Class = {
   description: string;
   address?: string;
   capacity: number;
+  price?: number | null;
   isVirtual?: boolean;
   virtualLink?: string;
 };
@@ -65,7 +66,7 @@ export default function AdminPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [waivers, setWaivers] = useState<Waiver[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, isVirtual: false, virtualLink: '' });
+  const [form, setForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, price: '', isVirtual: false, virtualLink: '' });
   const [bookingForm, setBookingForm] = useState({ 
     classId: '', 
     name: '', 
@@ -76,7 +77,7 @@ export default function AdminPage() {
     paid: true 
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, isVirtual: false, virtualLink: '' });
+  const [editForm, setEditForm] = useState({ date: '', time: '', description: '', address: '', capacity: 20, price: '', isVirtual: false, virtualLink: '' });
   const [activeTab, setActiveTab] = useState<'classes' | 'waivers' | 'bookings' | 'revenue'>('classes');
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [classBookings, setClassBookings] = useState<Booking[]>([]);
@@ -191,6 +192,7 @@ export default function AdminPage() {
       description: classData.description,
       address: classData.address || '',
       capacity: classData.capacity,
+      price: classData.price ? classData.price.toString() : '',
       isVirtual: classData.isVirtual || false,
       virtualLink: classData.virtualLink || ''
     });
@@ -198,7 +200,7 @@ export default function AdminPage() {
 
   function cancelEdit() {
     setEditingId(null);
-    setEditForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
+    setEditForm({ date: '', time: '', description: '', address: '', capacity: 20, price: '', isVirtual: false, virtualLink: '' });
   }
 
   async function handleEditSubmit(e: React.FormEvent) {
@@ -213,7 +215,7 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setEditingId(null);
-      setEditForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
+      setEditForm({ date: '', time: '', description: '', address: '', capacity: 20, price: '', isVirtual: false, virtualLink: '' });
       fetchClasses();
     } else {
       alert('Failed to update class');
@@ -230,7 +232,7 @@ export default function AdminPage() {
       body: JSON.stringify(form),
     });
     if (res.ok) {
-      setForm({ date: '', time: '', description: '', address: '', capacity: 10, isVirtual: false, virtualLink: '' });
+      setForm({ date: '', time: '', description: '', address: '', capacity: 20, price: '', isVirtual: false, virtualLink: '' });
       fetchClasses();
     } else {
       alert('Failed to add class');
@@ -678,6 +680,10 @@ export default function AdminPage() {
                   <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="capacity">Capacity</label>
                   <input type="number" id="capacity" name="capacity" value={form.capacity} onChange={handleChange} className="border rounded px-2 py-1 sm:w-20" min={1} required />
                 </div>
+                <div className="flex flex-col sm:w-24">
+                  <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="price">Price ($)</label>
+                  <input type="number" id="price" name="price" value={form.price} onChange={handleChange} className="border rounded px-2 py-1 sm:w-24" min={0} step="0.01" placeholder="Default" />
+                </div>
               </div>
               <div className="flex flex-col">
                 <label className="text-sm font-bold text-brown-700 mb-1" htmlFor="description">Description</label>
@@ -734,6 +740,10 @@ export default function AdminPage() {
                         <div className="flex flex-col sm:w-20">
                           <label className="text-sm font-bold text-brown-700 mb-1">Capacity</label>
                           <input type="number" name="capacity" value={editForm.capacity} onChange={handleEditChange} className="border rounded px-2 py-1 sm:w-20" min={1} required />
+                        </div>
+                        <div className="flex flex-col sm:w-24">
+                          <label className="text-sm font-bold text-brown-700 mb-1">Price ($)</label>
+                          <input type="number" name="price" value={editForm.price} onChange={handleEditChange} className="border rounded px-2 py-1 sm:w-24" min={0} step="0.01" placeholder="Default" />
                         </div>
                       </div>
                       <div className="flex flex-col">

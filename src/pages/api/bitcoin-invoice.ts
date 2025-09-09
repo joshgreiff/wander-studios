@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { getClassPrice } from '@/utils/pricing';
 
 const prisma = new PrismaClient();
 
@@ -63,11 +64,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Making request to Speed API...');
     
-    // Get dynamic pricing with 5% discount based on class date
-    const classDate = new Date(classItem.date);
-    const normalizedDate = new Date(Date.UTC(classDate.getFullYear(), classDate.getMonth(), classDate.getDate()));
-    const august31 = new Date(Date.UTC(2025, 7, 31)); // August 31, 2025 (month is 0-indexed)
-    const basePrice = normalizedDate <= august31 ? 10 : 14; // $10 on or before Aug 31, $14 after
+    // Get pricing for this specific class (custom price or date-based) with 5% discount
+    const basePrice = getClassPrice(classItem);
     const discountedPrice = basePrice * 0.95; // 5% discount
 
     const requestBody = {

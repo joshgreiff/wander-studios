@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   if (req.method === 'PUT') {
     try {
-      const { date, time, description, address, capacity, archived, isVirtual, virtualLink } = req.body;
+      const { date, time, description, address, capacity, price, archived, isVirtual, virtualLink } = req.body;
       if (!date || !time || !description || !capacity) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
@@ -36,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description,
           address: address || null,
           capacity: Number(capacity),
+          price: price ? Number(price) : null,
           archived: archived !== undefined ? Boolean(archived) : false,
           isVirtual: Boolean(isVirtual),
           virtualLink: virtualLink || null,

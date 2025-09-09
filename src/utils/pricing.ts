@@ -26,7 +26,7 @@ export function getIndividualClassPrice(date: Date = new Date()): number {
  * $10 for classes on or before August 31, 2025, $14 after
  */
 export function getCurrentIndividualClassPrice(): number {
-  return getIndividualClassPrice();
+  return getClassPriceForDate(new Date());
 }
 
 /**
@@ -34,7 +34,22 @@ export function getCurrentIndividualClassPrice(): number {
  * Note: This should be used when booking classes to get the correct price for that class date
  */
 export function getClassPriceForDate(classDate: Date): number {
-  return getIndividualClassPrice(classDate);
+  // Normalize the date to start of day in UTC for consistent comparison
+  const normalizedDate = new Date(Date.UTC(classDate.getFullYear(), classDate.getMonth(), classDate.getDate()));
+  const august31 = new Date(Date.UTC(2025, 7, 31)); // August 31, 2025 (month is 0-indexed)
+  return normalizedDate <= august31 ? 10 : 14; // $10 on or before Aug 31, $14 after
+}
+
+// Get price for a specific class, using custom price if set, otherwise falling back to date-based pricing
+export function getClassPrice(classItem: { price?: number | null, date: string | Date }): number {
+  // If class has a custom price, use that
+  if (classItem.price !== null && classItem.price !== undefined) {
+    return classItem.price;
+  }
+  
+  // Otherwise, use date-based pricing
+  const classDate = typeof classItem.date === 'string' ? new Date(classItem.date) : classItem.date;
+  return getClassPriceForDate(classDate);
 }
 
 /**
