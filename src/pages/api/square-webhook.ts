@@ -45,9 +45,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (webhookSecret && signature) {
       const body = JSON.stringify(req.body);
       const expectedSignature = crypto
-        .createHmac('sha256', webhookSecret)
+        .createHmac('sha1', webhookSecret)
         .update(body)
-        .digest('hex');
+        .digest('base64');
       
       if (signature !== expectedSignature) {
         console.error('Invalid webhook signature');
