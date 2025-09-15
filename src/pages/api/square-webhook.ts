@@ -1,8 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import { Readable } from 'node:stream';
 
 const prisma = new PrismaClient();
+
+// Get raw body as Buffer
+async function getRawBody(readable: Readable): Promise<Buffer> {
+  const chunks = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 // Square webhook types
 interface SquarePayment {
@@ -32,6 +42,13 @@ interface SquareOrder {
   [key: string]: unknown;
 }
 
+// Disable body parsing to get raw body
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -39,7 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Get the raw body first
-    const body = await req.text();
+    const rawBody = await getRawBody(req);
+    const body = rawBody.toString();
     
     // Verify webhook signature (optional but recommended for security)
     const signature = req.headers['x-square-signature'] as string;
