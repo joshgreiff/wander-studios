@@ -38,12 +38,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Get the raw body first
+    const body = await req.text();
+    
     // Verify webhook signature (optional but recommended for security)
     const signature = req.headers['x-square-signature'] as string;
     const webhookSecret = process.env.SQUARE_WEBHOOK_SECRET;
     
     if (webhookSecret && signature) {
-      const body = await req.text();
       const expectedSignature = crypto
         .createHmac('sha1', webhookSecret)
         .update(body)
