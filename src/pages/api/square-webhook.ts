@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const webhookSecret = process.env.SQUARE_WEBHOOK_SECRET;
     
     if (webhookSecret && signature) {
-      const body = JSON.stringify(req.body);
+      const body = await req.text();
       const expectedSignature = crypto
         .createHmac('sha1', webhookSecret)
         .update(body)
@@ -55,7 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    const { type, data } = req.body;
+    const parsedBody = JSON.parse(body);
+    const { type, data } = parsedBody;
 
     // Handle payment completion events
     if (type === 'payment.created' || type === 'payment.updated') {
