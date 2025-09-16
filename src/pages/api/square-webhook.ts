@@ -102,13 +102,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(200).json({ received: true, message: 'No payment object' });
         }
         
-        console.log('Payment status:', payment.status);
-        if (payment.status === 'COMPLETED') {
+        console.log('Payment status:', payment?.status);
+        if (payment?.status === 'COMPLETED') {
           await handlePaymentCompleted(payment);
         }
       } catch (error) {
         console.error('Error processing payment:', error);
-        return res.status(500).json({ error: 'Payment processing failed', details: error.message });
+        return res.status(500).json({ error: 'Payment processing failed', details: error instanceof Error ? error.message : String(error) });
       }
     }
 
@@ -122,13 +122,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(200).json({ received: true, message: 'No order object' });
         }
         
-        console.log('Order state:', order.state);
-        if (order.state === 'OPEN' || order.state === 'COMPLETED') {
+        console.log('Order state:', order?.state);
+        if (order?.state === 'OPEN' || order?.state === 'COMPLETED') {
           await handleOrderCompleted(order);
         }
       } catch (error) {
         console.error('Error processing order:', error);
-        return res.status(500).json({ error: 'Order processing failed', details: error.message });
+        return res.status(500).json({ error: 'Order processing failed', details: error instanceof Error ? error.message : String(error) });
       }
     }
 
