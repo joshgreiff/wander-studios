@@ -85,21 +85,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const parsedBody = JSON.parse(body);
     const { type, data } = parsedBody;
 
+    console.log('Webhook data received:', {
+      type,
+      hasData: !!data,
+      dataKeys: data ? Object.keys(data) : 'no data',
+      dataObjectKeys: data && data.object ? Object.keys(data.object) : 'no object'
+    });
+
     // Handle payment completion events
     if (type === 'payment.created' || type === 'payment.updated') {
-      const payment = data.object.payment;
-      
-      if (payment.status === 'COMPLETED') {
-        await handlePaymentCompleted(payment);
+      console.log('Processing payment event:', type);
+      try {
+        const payment = data?.object?.payment;
+        if (!payment) {
+          console.log('No payment object found in data');
+          return res.status(200).json({ received: true, message: 'No payment object' });
+        }
+        
+        console.log('Payment status:', payment.status);
+        if (payment.status === 'COMPLETED') {
+          await handlePaymentCompleted(payment);
+        }
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        return res.status(500).json({ error: 'Payment processing failed', details: error.message });
       }
     }
 
     // Handle order completion events
     if (type === 'order.created' || type === 'order.updated') {
-      const order = data.object.order;
-      
-      if (order.state === 'OPEN' || order.state === 'COMPLETED') {
-        await handleOrderCompleted(order);
+      console.log('Processing order event:', type);
+      try {
+        const order = data?.object?.order;
+        if (!order) {
+          console.log('No order object found in data');
+          return res.status(200).json({ received: true, message: 'No order object' });
+        }
+        
+        console.log('Order state:', order.state);
+        if (order.state === 'OPEN' || order.state === 'COMPLETED') {
+          await handleOrderCompleted(order);
+        }
+      } catch (error) {
+        console.error('Error processing order:', error);
+        return res.status(500).json({ error: 'Order processing failed', details: error.message });
       }
     }
 
