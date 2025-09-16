@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
 import { Readable } from 'node:stream';
 
 const prisma = new PrismaClient();
