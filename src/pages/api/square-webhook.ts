@@ -97,7 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (type === 'payment.created' || type === 'payment.updated') {
       console.log('Processing payment event:', type);
       try {
-        const payment = data?.object?.payment;
+        const payment = data?.object?.payment_updated || data?.object?.payment;
         if (!payment) {
           console.log('No payment object found in data');
           return res.status(200).json({ received: true, message: 'No payment object' });
@@ -117,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (type === 'order.created' || type === 'order.updated') {
       console.log('Processing order event:', type);
       try {
-        const order = data?.object?.order;
+        const order = data?.object?.order_updated || data?.object?.order;
         if (!order) {
           console.log('No order object found in data');
           return res.status(200).json({ received: true, message: 'No order object' });
