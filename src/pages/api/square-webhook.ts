@@ -89,7 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       type,
       hasData: !!data,
       dataKeys: data ? Object.keys(data) : 'no data',
-      dataObjectKeys: data && data.object ? Object.keys(data.object) : 'no object'
+      dataObjectKeys: data && data.object ? Object.keys(data.object) : 'no object',
+      fullData: JSON.stringify(data, null, 2)
     });
 
     // Handle payment completion events
