@@ -182,6 +182,25 @@ export default function ClassesPage() {
       </section>
 
       <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
+        <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Pilates in the Bookstore</h2>
+        <div className="text-brown-700 font-serif space-y-4">
+          <p className="text-brown-700">
+            Bookstore Pilates event at Blue Couch Bookstore in Grandview. Your ticket includes a 55 min Pilates class, a drink of choice from Alchemy, and private book shopping hours before the store opens.
+          </p>
+          <div className="text-center">
+            <a 
+              href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+            >
+              Book Bookstore Pilates
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
         <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Additional Classes at Generations - Starting 9/7</h2>
         <div className="text-brown-700 font-serif space-y-4">
           <p className="text-brown-700">

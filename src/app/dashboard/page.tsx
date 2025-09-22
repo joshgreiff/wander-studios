@@ -352,8 +352,13 @@ export default function DashboardPage() {
                       <span className={`px-2 py-1 rounded text-xs font-serif font-semibold ${
                         packageBooking.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {packageBooking.paid ? 'Paid' : 'Pending'}
+                        {packageBooking.paid ? 'Paid' : 'Pending Payment'}
                       </span>
+                      {!packageBooking.paid && (
+                        <p className="text-xs text-yellow-700 mt-1 font-serif">
+                          Complete payment to use
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
