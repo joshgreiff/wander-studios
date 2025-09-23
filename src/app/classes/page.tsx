@@ -26,6 +26,7 @@ export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [filter, setFilter] = useState<'all' | 'virtual' | 'in-person'>('all');
 
   useEffect(() => {
     // Check if user is logged in
@@ -86,17 +87,60 @@ export default function ClassesPage() {
     }
   };
 
+  // Filter classes based on the selected filter
+  const filteredClasses = classes.filter(c => {
+    if (filter === 'virtual') return c.isVirtual;
+    if (filter === 'in-person') return !c.isVirtual;
+    return true; // 'all' shows everything
+  });
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-warm-50 via-warm-100 to-warm-200 flex flex-col items-center p-4">
       <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 flex flex-col items-center border border-warm-200">
         <h1 className="text-3xl font-serif font-bold mb-6 text-brown-800 text-center">Upcoming Classes</h1>
+        
+        {/* Filter Toggle */}
+        <div className="mb-6 flex flex-wrap justify-center gap-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-full font-serif text-sm transition ${
+              filter === 'all' 
+                ? 'bg-warm-400 text-white' 
+                : 'bg-warm-200 text-brown-700 hover:bg-warm-300'
+            }`}
+          >
+            All Classes
+          </button>
+          <button
+            onClick={() => setFilter('in-person')}
+            className={`px-4 py-2 rounded-full font-serif text-sm transition ${
+              filter === 'in-person' 
+                ? 'bg-warm-400 text-white' 
+                : 'bg-warm-200 text-brown-700 hover:bg-warm-300'
+            }`}
+          >
+            In-Person
+          </button>
+          <button
+            onClick={() => setFilter('virtual')}
+            className={`px-4 py-2 rounded-full font-serif text-sm transition ${
+              filter === 'virtual' 
+                ? 'bg-warm-400 text-white' 
+                : 'bg-warm-200 text-brown-700 hover:bg-warm-300'
+            }`}
+          >
+            Virtual
+          </button>
+        </div>
         {loading ? (
           <div className="text-brown-700 font-serif">Loading...</div>
         ) : classes.length === 0 ? (
           <div className="text-brown-700 font-serif">No classes scheduled yet.</div>
+        ) : filteredClasses.length === 0 ? (
+          <div className="text-brown-700 font-serif">No {filter === 'virtual' ? 'virtual' : filter === 'in-person' ? 'in-person' : ''} classes scheduled.</div>
         ) : (
           <ul className="w-full flex flex-col gap-4">
-            {classes.map(c => {
+            {filteredClasses.map(c => {
               const currentBookings = c.bookings?.length || 0;
               const availableSpots = c.capacity - currentBookings;
               const isFull = availableSpots <= 0;
