@@ -159,14 +159,14 @@ export default function ClassesPage() {
                 Bookstore Pilates event at Blue Couch Bookstore in Grandview. Your ticket includes a 55 min Pilates class, a drink of choice from Alchemy, and private book shopping hours before the store opens.
               </p>
               <div className="text-center">
-                <a 
-                  href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
-                >
-                  Book Bookstore Pilates
-                </a>
+                                 <a 
+                   href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+                 >
+                   Register
+                 </a>
               </div>
             </div>
           </div>
