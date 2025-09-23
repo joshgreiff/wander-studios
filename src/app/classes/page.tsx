@@ -150,23 +150,113 @@ export default function ClassesPage() {
         </div>
         {loading ? (
           <div className="text-brown-700 font-serif">Loading...</div>
-        ) : filter === 'events' ? (
-          /* Events Content */
+                ) : filter === 'events' || filter === 'all' ? (
+          /* Events Content - show in both Events tab and All Classes tab */
           <div className="w-full">
+            {(filter === 'all' && filteredClasses.length > 0) && (
+              /* Show regular classes first when on All tab */
+              <ul className="w-full flex flex-col gap-4 mb-6">
+                {filteredClasses.map(c => {
+                  const currentBookings = c.bookings?.length || 0;
+                  const availableSpots = c.capacity - currentBookings;
+                  const isFull = availableSpots <= 0;
+                  
+                  return (
+                    <li key={c.id} className="border border-warm-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-warm-50/80 shadow">
+                      <div className="flex-1">
+                        <div className="font-serif font-semibold text-brown-800 text-lg">
+                          {formatDateTime(c.date, c.time)}
+                          {c.isVirtual && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Virtual</span>}
+                        </div>
+                        <div className="text-brown-700 font-serif">{c.description}</div>
+                        <div className="text-brown-600 text-sm font-serif">
+                          {isFull ? (
+                            <span className="text-red-600 font-serif font-semibold">Class Full ({c.capacity}/{c.capacity})</span>
+                          ) : (
+                            <span>Available Spots: {availableSpots}/{c.capacity}</span>
+                          )}
+                        </div>
+                        {c.isVirtual && (
+                          <div className="text-blue-700 text-sm mt-1">
+                            🔗 Virtual class link will be provided after booking
+                          </div>
+                        )}
+                        
+                        {/* Calendar Integration for Logged-in Users */}
+                        {user && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => {
+                                const event = createClassCalendarEvent(
+                                  c.description,
+                                  new Date(c.date),
+                                  c.time,
+                                  `Join us for ${c.description} at Wander Movement!${c.isVirtual && c.virtualLink ? `\n\nVirtual Class Link: ${c.virtualLink}` : ''}`,
+                                  c.address,
+                                  c.virtualLink
+                                );
+                                const icalContent = generateICalEvent(event);
+                                downloadCalendarFile(icalContent, `wander-movement-${c.description.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                            >
+                              <span>📱</span>
+                              <span>Apple</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const event = createClassCalendarEvent(
+                                  c.description,
+                                  new Date(c.date),
+                                  c.time,
+                                  `Join us for ${c.description} at Wander Movement!${c.isVirtual && c.virtualLink ? `\n\nVirtual Class Link: ${c.virtualLink}` : ''}`,
+                                  c.address,
+                                  c.virtualLink
+                                );
+                                const googleUrl = generateGoogleCalendarUrl(event);
+                                window.open(googleUrl, '_blank');
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                            >
+                              <span>📅</span>
+                              <span>Google</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <Link
+                        href={`/book/${c.id}`}
+                        className={`mt-4 sm:mt-0 font-serif font-semibold py-2 px-6 rounded transition text-center ${
+                          isFull 
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                            : 'bg-warm-400 text-white hover:bg-warm-500'
+                        }`}
+                      >
+                        {isFull ? 'Full' : 'Book'}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            
+            {/* Events Section */}
             <div className="border border-warm-200 rounded-lg p-6 bg-warm-50/80 shadow">
-              <h3 className="text-xl font-serif font-bold mb-4 text-brown-800">Pilates in the Bookstore</h3>
+              <h3 className="text-xl font-serif font-bold mb-4 text-brown-800">
+                Pilates in the Bookstore - October 19
+              </h3>
               <p className="text-brown-700 font-serif mb-4">
                 Bookstore Pilates event at Blue Couch Bookstore in Grandview. Your ticket includes a 55 min Pilates class, a drink of choice from Alchemy, and private book shopping hours before the store opens.
               </p>
               <div className="text-center">
-                                 <a 
-                   href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
-                 >
-                   Register
-                 </a>
+                <a 
+                  href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+                >
+                  Register
+                </a>
               </div>
             </div>
           </div>
