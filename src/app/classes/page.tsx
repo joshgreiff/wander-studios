@@ -26,7 +26,7 @@ export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [filter, setFilter] = useState<'all' | 'virtual' | 'in-person'>('all');
+  const [filter, setFilter] = useState<'all' | 'virtual' | 'in-person' | 'events'>('all');
 
   useEffect(() => {
     // Check if user is logged in
@@ -87,10 +87,14 @@ export default function ClassesPage() {
     }
   };
 
+  // Check if we have events (for now, we'll always show events tab since we have the bookstore event)
+  const hasEvents = true; // We have the bookstore event
+
   // Filter classes based on the selected filter
   const filteredClasses = classes.filter(c => {
     if (filter === 'virtual') return c.isVirtual;
     if (filter === 'in-person') return !c.isVirtual;
+    if (filter === 'events') return false; // Events are handled separately, not in regular classes
     return true; // 'all' shows everything
   });
 
@@ -131,9 +135,41 @@ export default function ClassesPage() {
           >
             Virtual
           </button>
+          {hasEvents && (
+            <button
+              onClick={() => setFilter('events')}
+              className={`px-4 py-2 rounded-full font-serif text-sm transition ${
+                filter === 'events' 
+                  ? 'bg-warm-400 text-white' 
+                  : 'bg-warm-200 text-brown-700 hover:bg-warm-300'
+              }`}
+            >
+              Events
+            </button>
+          )}
         </div>
         {loading ? (
           <div className="text-brown-700 font-serif">Loading...</div>
+        ) : filter === 'events' ? (
+          /* Events Content */
+          <div className="w-full">
+            <div className="border border-warm-200 rounded-lg p-6 bg-warm-50/80 shadow">
+              <h3 className="text-xl font-serif font-bold mb-4 text-brown-800">Pilates in the Bookstore</h3>
+              <p className="text-brown-700 font-serif mb-4">
+                Bookstore Pilates event at Blue Couch Bookstore in Grandview. Your ticket includes a 55 min Pilates class, a drink of choice from Alchemy, and private book shopping hours before the store opens.
+              </p>
+              <div className="text-center">
+                <a 
+                  href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+                >
+                  Book Bookstore Pilates
+                </a>
+              </div>
+            </div>
+          </div>
         ) : classes.length === 0 ? (
           <div className="text-brown-700 font-serif">No classes scheduled yet.</div>
         ) : filteredClasses.length === 0 ? (
@@ -225,43 +261,26 @@ export default function ClassesPage() {
         )}
       </section>
 
-      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
-        <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Pilates in the Bookstore</h2>
-        <div className="text-brown-700 font-serif space-y-4">
-          <p className="text-brown-700">
-            Bookstore Pilates event at Blue Couch Bookstore in Grandview. Your ticket includes a 55 min Pilates class, a drink of choice from Alchemy, and private book shopping hours before the store opens.
-          </p>
-          <div className="text-center">
-            <a 
-              href="https://www.eventbrite.com/e/pilates-in-the-bookstore-tickets-1669432761329?aff=oddtdtcreator" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
-            >
-              Book Bookstore Pilates
-            </a>
+      {(filter === 'all' || filter === 'in-person') && (
+        <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
+          <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Additional Classes at Generations - Starting 9/7</h2>
+          <div className="text-brown-700 font-serif space-y-4">
+            <p className="text-brown-700">
+              Mat Pilates class in Westerville, OH, at Generations Performing Arts Center. To sign up, create an account, click Register, and then Classes. You will find the Pilates classes under &quot;Class Sessions&quot; please reach out to Ltwander@gmail.com with questions.
+            </p>
+            <div className="text-center">
+              <a 
+                href="https://app.gostudiopro.com/online/index.php?account_id=6191&device_id=&devicetoken=" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
+              >
+                Sign Up for Generations Classes
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="max-w-2xl w-full bg-warm-50/95 rounded-xl shadow p-8 mt-8 border border-warm-200">
-        <h2 className="text-2xl font-serif font-bold mb-4 text-brown-800 text-center">Additional Classes at Generations - Starting 9/7</h2>
-        <div className="text-brown-700 font-serif space-y-4">
-          <p className="text-brown-700">
-            Mat Pilates class in Westerville, OH, at Generations Performing Arts Center. To sign up, create an account, click Register, and then Classes. You will find the Pilates classes under &quot;Class Sessions&quot; please reach out to Ltwander@gmail.com with questions.
-          </p>
-          <div className="text-center">
-            <a 
-              href="https://app.gostudiopro.com/online/index.php?account_id=6191&device_id=&devicetoken=" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block bg-warm-400 hover:bg-warm-500 text-white font-serif font-semibold py-3 px-8 rounded-full transition"
-            >
-              Sign Up for Generations Classes
-            </a>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }
