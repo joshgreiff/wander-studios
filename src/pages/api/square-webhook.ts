@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const signature = req.headers['x-square-signature'] as string;
     const webhookSecret = process.env.SQUARE_WEBHOOK_SECRET;
     
-    // TEMPORARILY DISABLED: Signature verification for debugging
+    // Verify webhook signature for security
     console.log('Webhook received:', {
       hasSignature: !!signature,
       hasSecret: !!webhookSecret,
@@ -70,17 +70,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       bodyLength: body.length
     });
     
-    // if (webhookSecret && signature) {
-    //   const expectedSignature = crypto
-    //     .createHmac('sha1', webhookSecret)
-    //     .update(body)
-    //     .digest('base64');
-    //   
-    //   if (signature !== expectedSignature) {
-    //     console.error('Invalid webhook signature');
-    //     return res.status(401).json({ error: 'Invalid signature' });
-    //   }
-    // }
+    if (webhookSecret && signature) {
+      const crypto = require('crypto');
+      const expectedSignature = crypto
+        .createHmac('sha1', webhookSecret)
+        .update(body)
+        .digest('base64');
+      
+      if (signature !== expectedSignature) {
+        console.error('Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      console.log('✅ Webhook signature verified');
+    } else {
+      console.log('⚠️ Webhook signature verification skipped (missing secret or signature)');
+    }
 
     const parsedBody = JSON.parse(body);
     const { type, data } = parsedBody;
@@ -151,37 +155,11 @@ async function handlePaymentCompleted(payment: SquarePayment) {
       return;
     }
 
-    // Look up the order to get metadata
-    const order = await prisma.$queryRaw`
-      SELECT metadata FROM square_orders WHERE id = ${orderId}
-    ` as { metadata?: { packageBookingId?: string } }[];
-    
-    if (!order || !order[0]?.metadata) {
-      console.log('No order metadata found, trying fallback method');
-      await handlePaymentCompletedFallback(payment);
-      return;
-    }
-
-    const metadata = order[0].metadata;
-    const packageBookingId = metadata.packageBookingId;
-    
-    if (packageBookingId) {
-      console.log(`Found package booking ID: ${packageBookingId} in order metadata`);
-      
-      // Mark the specific package as paid
-      await prisma.packageBooking.update({
-        where: { id: parseInt(packageBookingId) },
-        data: { 
-          paid: true,
-          paymentId: payment.id
-        }
-      });
-      
-      console.log(`Successfully marked package ${packageBookingId} as paid for payment ${payment.id}`);
-    } else {
-      console.log('No package booking ID found in metadata, trying fallback method');
-      await handlePaymentCompletedFallback(payment);
-    }
+    // Skip the broken square_orders table lookup - metadata should be in the webhook payload
+    console.log('Skipping square_orders table lookup (table does not exist)');
+    console.log('Trying fallback method to find package booking');
+    await handlePaymentCompletedFallback(payment);
+    return;
   } catch (error) {
     console.error('Error handling payment completion:', error);
     // Fallback to old method if metadata approach fails
